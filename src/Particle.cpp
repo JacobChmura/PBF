@@ -1,9 +1,11 @@
 #include <Particle.h>
 
-Particle::Particle(int x){
-	test = x;
-}
+Particle::Particle(Eigen::Vector3d X_init, double mass){
+	this->m = mass;
+	this->x = X_init;
+	this->X = X_init;
 
-int Particle::getTest(){
-	return test;
-}
+	this->v.setZero();
+	this->f.setZero();
+}	
+

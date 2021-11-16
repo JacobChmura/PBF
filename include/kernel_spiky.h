@@ -1,4 +1,8 @@
 #include <Particle.h>
+#include <Eigen/Dense>
+#include <cmath>
+
+#define PI 3.14159265358979323846 
 
 /*
 Compute the spiky kernel between two particles for gradient estimation. 
@@ -9,6 +13,6 @@ Input:
 	double h: Kernel Radius.
 
 Output:
-	double result: The output of the spiky kernel based on the position of p_i, p_j.
+	Eigen::Vector3d result: The output of the spiky kernel based on the position of p_i, p_j.
 */
-double kernel_spiky(Particle &p_i, Particle &p_j, double h);
+void kernel_spiky(Eigen::Vector3d &result, Particle &p_i, Particle &p_j, double h);

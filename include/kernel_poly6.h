@@ -1,4 +1,7 @@
 #include <Particle.h>
+#include <cmath>
+
+#define PI 3.14159265358979323846 
 
 /*
 Compute the Poly6 kernel between two particles for density estimation. 

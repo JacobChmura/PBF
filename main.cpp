@@ -32,9 +32,5 @@ double VORTICITY_c = 0.01;
 int main(int argc, char **argv) {
 
     std::cout<<"Start PBF \n";
-
-    Particle p(5);
-    std::cout << "test: " << p.getTest();
-
     return 0;
 }
