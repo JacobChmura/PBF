@@ -1,6 +1,6 @@
 #include <vorticity.h>
 
-void apply_vorticity(std::list<Particle> &fluid, double kernel_h){
+void apply_vorticity(std::list<Particle> &fluid, double kernel_h, double vorticity_epsilon){
 
 	// Compute curl
 	for (Particle &p_i : fluid){
@@ -21,7 +21,7 @@ void apply_vorticity(std::list<Particle> &fluid, double kernel_h){
 		p_i.N = p_i.eta / p_i.eta.norm();
 
 		// Get vorticity corrective force and update velocity
-		p_i.vorticity_f = p_i.N.cross(p_i.omega);
+		p_i.vorticity_f = vorticity_epsilon * p_i.N.cross(p_i.omega);
 		p_i.v += dt * p_i.vorticity_f;
 	}
 

@@ -121,10 +121,10 @@ Fluid::step(){
 	}
 
 	// Vorticity (O(n^2))
-	apply_vorticity(this->fluid);
+	apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon);
 
 	// Viscocity (O(n^2))
-	apply_viscocity(this->fluid);
+	apply_viscocity(this->fluid, this->kernel_h, this->viscocity_c);
 
 	// Update Position
 	for (Particle &p : this->fluid){
