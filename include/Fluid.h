@@ -2,6 +2,7 @@
 #define FLUID
 
 #include <Eigen/Dense>
+#include <cmath>
 #include <list>
 
 class Fluid{
@@ -34,6 +35,7 @@ public:
 	double vorticity_epsilon;
 
 	// Simulation Parameters
+	double t;
 	double dt;
 
 public:
