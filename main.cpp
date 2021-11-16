@@ -14,7 +14,7 @@ double USER_F = 20.0;
 // Jacobi Parameters
 int JACOBI_ITERATIONS = 4;
 
-// Constraint Fore Mixing Relaxation
+// Constraint Force Mixing Relaxation
 double CFM_EPSILON = 600.0;
 
 // Kernel Parameters
@@ -25,9 +25,14 @@ double TENSILE_k = 0.1;
 double TENSILE_delta_q = 0.2 * KERNEL_h;
 int TENSILE_n = 4;
 
-// Vorticity Parameters
-double VORTICITY_c = 0.01;
+// Visocity Parameters
+double VISCOCITY_c = 0.01;
 
+// Vorticity Parameters
+double VORTICITY_EPSILON = 0.0005;
+
+// Simulation Parameters
+double dt = 0.001;
 
 int main(int argc, char **argv) {
 
