@@ -1,6 +1,6 @@
 #include <vorticity.h>
 
-void apply_vorticity(std::list<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt){
+void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt){
 	Eigen::Vector3d ker_res;
 
 	// Compute curl

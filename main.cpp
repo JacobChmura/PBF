@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <thread>
 #include <visualization.h>
+#include <Fluid.h>
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
@@ -35,6 +36,9 @@ double VORTICITY_EPSILON = 0.0005;
 // Simulation Parameters
 double dt = 0.001;
 
+// Bounding Box Extrema
+double LOWER_BOUND = -1;
+double UPPER_BOUND = 1;
 
 // dummy test
 int num_particles = 1000;
@@ -52,14 +56,17 @@ Eigen::MatrixXd V_box(8,3);
 Eigen::MatrixXi E_box(12,2);
 
 // Global state
+Fluid fluid(PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
+			CFM_EPSILON, KERNEL_h, TENSILE_k, TENSILE_delta_q, TENSILE_n, 
+			VISCOCITY_c, VORTICITY_EPSILON, LOWER_BOUND, UPPER_BOUND, dt);
+
 Eigen::MatrixXd fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
 Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 // --------------
 
 void simulate(){
 	while(simulating){
-		velocity.setRandom();
-		fluid_state += dt * velocity;
+		fluid.step(fluid_state);
 	}
 }
 
@@ -76,8 +83,8 @@ int main(int argc, char **argv) {
 	std::cout<<"Start PBF \n";
 
 	// --- Initialize setup ----
-	m << -1, -1, -1;	
-	M << 1, 1, 1;
+	m << -LOWER_BOUND, -LOWER_BOUND, -LOWER_BOUND;	
+	M << UPPER_BOUND, UPPER_BOUND, UPPER_BOUND;
 
 	V_box <<
 	m(0), m(1), m(2),
@@ -103,6 +110,9 @@ int main(int argc, char **argv) {
 	7 ,3;
 	// --------------------
 
+	fluid.init_state(fluid_state); // random init
+
+	// exit(0);
 
 	std::thread simulation_thread(simulate);
     simulation_thread.detach();

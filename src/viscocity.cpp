@@ -1,6 +1,6 @@
 #include <viscocity.h>
 
-void apply_viscocity(std::list<Particle> &fluid, double kernel_h, double viscocity_c){
+void apply_viscocity(std::vector<Particle> &fluid, double kernel_h, double viscocity_c){
 
 	for(Particle &p_i : fluid){
 		p_i.v_new = p_i.v;
