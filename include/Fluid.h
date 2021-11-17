@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <list>
+#include <Particle.h>
 
 class Fluid{
 public:
@@ -38,6 +39,11 @@ public:
 	double t;
 	double dt;
 
+
+	// Temp variables
+	Eigen::Vector3d ker_res;
+	double s_corr;
+
 public:
 	
 	//Initialize a blank new fluid.
@@ -46,10 +52,10 @@ public:
 			double viscocity_c, double vorticity_epsilon, double dt);
 
 	// Load a scene
-	init_state();
+	void init_state();
 	
 	//Perform a timestep update.
-	step();
+	void step();
 
 };
 

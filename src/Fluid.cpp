@@ -2,7 +2,7 @@
 #include <kernel_poly6.h>
 #include <kernel_spiky.h>
 #include <vorticity.h>
-#include <visocity.h>
+#include <viscocity.h>
 
 Fluid::Fluid(double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -30,28 +30,30 @@ Fluid::Fluid(double particle_mass, double rho, double gravity_f, double user_f, 
 	this->dt = dt;
 }	
 
-Fluid::init_state(){}
+void Fluid::init_state(){}
 
-Fluid::step(){
+void Fluid::step(){
 
 	auto accumulate_c_grad_norm = [&](Particle &p_i, Particle &p_j){
 		Eigen::Vector3d c_grad_norm_ij;
 		c_grad_norm_ij.setZero();
 
-		if (p_i == p_j){
+		if (&p_i == &p_j){
 			for (Particle &p_k : p_i.neighbors){
-				c_grad_norm_ij += (1 / this->rho) * kernel_spiky(p_i, p_k, this->kernel_h);
+				kernel_spiky(this->ker_res, p_i, p_k, this->kernel_h);
+				c_grad_norm_ij += (1 / this->rho) * this->ker_res;
 			}
 		}
 		else{
-			c_grad_norm_ij = (-1 / this->rho) * kernel_spiky(p_i, p_j, this->kernel_h);
+			kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
+			c_grad_norm_ij = (-1 / this->rho) * this->ker_res;
 		}
 
 		p_i.c_grad_neighorhood_norm += c_grad_norm_ij.norm();
 	};
 
-	auto compute_s_corr = [&](Particle &p_i, Particle &p_j){
-		return - this->tensile_k * pow(kernel_poly6(p_i, p_j, this->kernel_h) / kernel_poly6(this->tensile_delta_q), this->tensile_n);
+	auto compute_s_corr = [&](double &s_corr, Particle &p_i, Particle &p_j){
+		s_corr = - this->tensile_k * pow(kernel_poly6(p_i, p_j, this->kernel_h) / kernel_poly6(this->tensile_delta_q, this->kernel_h), this->tensile_n);
 	};
 
 
@@ -70,7 +72,7 @@ Fluid::step(){
 
 	// Get Neighours (Naive O(n^2))
 	for(Particle &p_i : this->fluid){
-		p.neighbors.clear();
+		p_i.neighbors.clear();
 
 		for(Particle &p_j : this->fluid){
 			if ((p_i.x_new - p_j.x_new).norm() <= 2 * this->kernel_h) p_i.neighbors.push_back(p_j);
@@ -101,8 +103,10 @@ Fluid::step(){
 		for(Particle &p_i : this->fluid){
 			p_i.dP.setZero();
 
-			for(Particle &p_j : p_j.neighbors){
-				p_i.dP += ((p_i.lambda + p_j.lambda + compute_s_corr(p_i, p_j)) / this->rho) * kernel_spiky(p_i, p_j);
+			for(Particle &p_j : p_i.neighbors){
+				kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
+				compute_s_corr(this->s_corr, p_i, p_j);
+				p_i.dP += ((p_i.lambda + p_j.lambda + this->s_corr) / this->rho) * this->ker_res;
 			}
 		}
 
@@ -116,19 +120,19 @@ Fluid::step(){
 
 	// Update Velocity
 	for(Particle &p: this->fluid){
-		p_i.dX = p_i.x_new - p_i.x;
-		p_i.v += p_i.dX / this->dt;
+		p.dX = p.x_new - p.x;
+		p.v += p.dX / this->dt;
 	}
 
 	// Vorticity (O(n^2))
-	apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon);
+	apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon, this->dt);
 
 	// Viscocity (O(n^2))
 	apply_viscocity(this->fluid, this->kernel_h, this->viscocity_c);
 
 	// Update Position
 	for (Particle &p : this->fluid){
-		p_i.x = p_i.x_new;
+		p.x = p.x_new;
 	}
 
 	this->t += this->dt;

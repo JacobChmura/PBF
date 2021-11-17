@@ -15,3 +15,16 @@ Output:
 	double result: The output of the Poly6 kernel based on the position of p_i, p_j.
 */
 double kernel_poly6(Particle &p_i, Particle &p_j, double h);
+
+
+/*
+Compute the Poly6 kernel given an explicit radius r from origin. 
+
+Input:
+	double r: radius of interaction
+	double h: Kernel Radius.
+
+Output:
+	double result: The output of the Poly6 kernel based on the radius r.
+*/
+double kernel_poly6(double r, double h);

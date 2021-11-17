@@ -1,4 +1,4 @@
-#include <visocity.h>
+#include <viscocity.h>
 
 void apply_viscocity(std::list<Particle> &fluid, double kernel_h, double viscocity_c){
 
