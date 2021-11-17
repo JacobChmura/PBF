@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 	std::cout<<"Start PBF \n";
 
 	// --- Initialize setup ----
-	m << -LOWER_BOUND, -LOWER_BOUND, -LOWER_BOUND;	
+	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	
 	M << UPPER_BOUND, UPPER_BOUND, UPPER_BOUND;
 
 	V_box <<
@@ -111,8 +111,6 @@ int main(int argc, char **argv) {
 	// --------------------
 
 	fluid.init_state(fluid_state); // random init
-
-	// exit(0);
 
 	std::thread simulation_thread(simulate);
     simulation_thread.detach();
