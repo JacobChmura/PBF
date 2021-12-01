@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include <list>
+#include <set>
 
 class Particle{
 public:
@@ -15,7 +16,8 @@ public:
 	Eigen::Vector3d f; // Forces
 
 	// Neighourhood Parameters
-	std::list<Particle> neighbors; // list of particles which neighour the current particle
+	std::set<int> neighbours; // list of particles which neighour the current particle
+        int global_idx; // each particle stores a global index into the fluid
 
 	// Jacobi Parameters
 	double c; // density constraint result
@@ -33,12 +35,14 @@ public:
 	Eigen::Vector3d N; // Normalized location vector
 	Eigen::Vector3d vorticity_f; // corrective vorticity force
 
+        // Spatial Grid Hashing
+        Eigen::Vector3d cell_coord;
 
 public:
 	/*
 	Initialize a new fluid particle at position X_init and with mass m.
 	*/
-	Particle(Eigen::Vector3d X_init, double m);
+	Particle(Eigen::Vector3d X_init, double m, int global_idx);
 };
 
 #endif

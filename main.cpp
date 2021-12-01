@@ -56,7 +56,7 @@ Eigen::MatrixXd V_box(8,3);
 Eigen::MatrixXi E_box(12,2);
 
 // Global state
-Fluid fluid(PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
+Fluid fluid(num_particles, PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
 			CFM_EPSILON, KERNEL_h, TENSILE_k, TENSILE_delta_q, TENSILE_n, 
 			VISCOCITY_c, VORTICITY_EPSILON, LOWER_BOUND, UPPER_BOUND, dt);
 
@@ -66,6 +66,7 @@ Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 
 void simulate(){
 	while(simulating){
+		std::cout << "step.\n";
 		fluid.step(fluid_state);
 	}
 }
