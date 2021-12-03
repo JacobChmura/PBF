@@ -21,7 +21,7 @@ namespace Visualize {
 
     void add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &E, Eigen::RowVector3d color);
     
-    void update_vertex_positions(Eigen::Ref<const Eigen::MatrixXd> pos);
+    void update_vertex_positions(Eigen::Ref<const Eigen::MatrixXd> pos, Eigen::Ref<const Eigen::MatrixXd> colors);
 }
 
 

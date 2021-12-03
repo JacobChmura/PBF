@@ -34,8 +34,9 @@ void Visualize::add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::Matri
 }
 
 // update vertex positions
-void Visualize::update_vertex_positions(Eigen::Ref<const Eigen::MatrixXd> pos){
-	g_viewer.data().set_points(pos,Eigen::RowVector3d(0,0,1));
+void Visualize::update_vertex_positions(Eigen::Ref<const Eigen::MatrixXd> pos, Eigen::Ref<const Eigen::MatrixXd> colors){
+	g_viewer.data().set_points(pos,colors);
+
 }
 
 

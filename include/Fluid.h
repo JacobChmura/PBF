@@ -64,7 +64,7 @@ public:
 	void init_state(Eigen::MatrixXd &fluid_state);
 	
 	//Perform a timestep update.
-	void step(Eigen::MatrixXd &fluid_state);
+	void step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors);
 
 };
 

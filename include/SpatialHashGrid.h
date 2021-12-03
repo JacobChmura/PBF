@@ -7,12 +7,12 @@
 #include <map>
 #include <set>
 #include <Particle.h>
-
+#include <utility> // pair
 class SpatialHashGrid{
 
 public: 
         // Initialize a Spacial Hash Grid with a given boundary and granularity
-        SpatialHashGrid(double l_bound, double cell_size, int num_particles);
+        SpatialHashGrid(double l_bound, double u_bound, double cell_size, int num_particles);
         SpatialHashGrid(); // default constructor
 
         // Insert a particle into our grid
@@ -30,22 +30,16 @@ public:
 private:
         
         // Maps a cell hash to a list of particle global indices
-        std::map<int, std::set<int>> cells;
-        Eigen::Vector3d lower_bound;
+        std::map<std::tuple<int, int, int>, std::set<int>> cells;
+        Eigen::Vector3d lower_bound, upper_bound;
         double cell_size;
+        int table_size;
 
         // Convert World Coordiantes to Cell Coordinates
         Eigen::Vector3d WorldToCell(Eigen::Vector3d world_coord);
 
         // Hash map cell coordinates to a bucket in our hash map
-        int hash(Eigen::Vector3d cell_coord);
-
-        // Hash functions large primes
-        int table_size;
-        int P1 = 73856093;
-        int P2 = 19349663;
-        int P3 = 83492791;
-
+        std::tuple<int, int, int> hash(Eigen::Vector3d cell_coord);
 };
 
 

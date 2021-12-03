@@ -35,7 +35,7 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 	this->lower_bound = lower_bound;
 	this->upper_bound = upper_bound;
 
-        this->grid = SpatialHashGrid(lower_bound, 2 * kernel_h, num_particles);
+        this->grid = SpatialHashGrid(lower_bound, upper_bound, kernel_h, num_particles);
 }	
 
 void Fluid::init_state(Eigen::MatrixXd &fluid_state){
@@ -48,24 +48,24 @@ void Fluid::init_state(Eigen::MatrixXd &fluid_state){
 	}
 }
 
-void Fluid::step(Eigen::MatrixXd &fluid_state){
+void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 
 	auto accumulate_c_grad_norm = [&](Particle &p_i, Particle &p_j){
 		Eigen::Vector3d c_grad_norm_ij;
 		c_grad_norm_ij.setZero();
 
-		if (&p_i == &p_j){
+		if (p_i.global_idx == p_j.global_idx){
 			for (int particle_idx : p_i.neighbours){
                                 Particle p_k = this->fluid[particle_idx];
 				kernel_spiky(this->ker_res, p_i, p_k, this->kernel_h);
-				c_grad_norm_ij += (1 / this->rho) * this->ker_res;
+				c_grad_norm_ij += this->ker_res;
 			}
 		}
 		else{
 			kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
-			c_grad_norm_ij = (-1 / this->rho) * this->ker_res;
+			c_grad_norm_ij = -1 * this->ker_res;
 		}
-
+                c_grad_norm_ij /= this->rho;
 		p_i.c_grad_neighorhood_norm += c_grad_norm_ij.norm();
 	};
 
@@ -79,7 +79,8 @@ void Fluid::step(Eigen::MatrixXd &fluid_state){
 		p.f.setZero();
 		
 		// Gravity Force
-		p.f[1] = - p.m * this->gravity_f;
+		//p.f[1] = - p.m * this->gravity_f;
+                p.f = Eigen::Vector3d::Random();
 
 		// User Force (TODO)
 		p.v += this->dt * p.f;
@@ -103,20 +104,19 @@ void Fluid::step(Eigen::MatrixXd &fluid_state){
 			p_i.c_grad_neighorhood_norm = 0;
 
 			// Compute density estimate 
-                        //std::cout << "num neibhours: " << p_i.neighbours.size() << "\n";
 			for(int particle_idx: p_i.neighbours){
                                 Particle p_j = this->fluid[particle_idx];
 				p_i.rho += p_i.m * kernel_poly6(p_i, p_j, this->kernel_h);
 				accumulate_c_grad_norm(p_i, p_j);
 			}
-
 			// Compute constraint lambda
 			p_i.c = (p_i.rho / this->rho) - 1;
-			//std::cout << p_i.c << "\n";
 			p_i.lambda = - p_i.c / (p_i.c_grad_neighorhood_norm + this->cfm_epsilon);
 		}
 
-		std::cout << "\t\tComputed Densities\n";
+                Particle p_first = this->fluid[0];
+                std::cout << "Rest Density: " << this->rho << " |  Particle Density: " << p_first.rho << " |  Constraint : " << p_first.c << " | Num neighbours: " << p_first.neighbours.size() << "\n"; 
+		//std::cout << "\t\tComputed Densities\n";
 		// Compute dP
 		for(Particle &p_i : this->fluid){
 			p_i.dP.setZero();
@@ -125,30 +125,52 @@ void Fluid::step(Eigen::MatrixXd &fluid_state){
                                 Particle p_j = this->fluid[particle_idx];
 				kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
 				compute_s_corr(this->s_corr, p_i, p_j);
-				p_i.dP += ((p_i.lambda + p_j.lambda + this->s_corr) / this->rho) * this->ker_res;
+				p_i.dP += (p_i.lambda + p_j.lambda + this->s_corr) * this->ker_res;
 			}
+                        p_i.dP /= this->rho;
 		}
-		std::cout << "\t\tComputed dP\n";
+                p_first = this->fluid[0];
+                std::cout << "lambda: " << p_first.lambda << "dP norm: " << p_first.dP.norm() << " \n";
+		//std::cout << "\t\tComputed dP\n";
 		// Collision Detection with boundary box and solid (TODO)
 		for (Particle &p : this->fluid){
 			p.x_new += p.dP;
 
 			// Collision Detect correct p.x_new (naive)
-			if (p.x_new[0] < this->lower_bound) p.x_new[0] = this->lower_bound;
-			if (p.x_new[0] > this->upper_bound) p.x_new[0] = this->upper_bound;
-			if (p.x_new[1] < this->lower_bound) p.x_new[1] = this->lower_bound;
-			if (p.x_new[1] > this->upper_bound) p.x_new[1] = this->upper_bound;
-			if (p.x_new[2] < this->lower_bound) p.x_new[2] = this->lower_bound;
-			if (p.x_new[2] > this->upper_bound) p.x_new[2] = this->upper_bound;
+			if (p.x_new[0] < this->lower_bound){ 
+                                p.x_new[0] = this->lower_bound;
+                                p.v[0] *= -1;
+
+                        }
+                        if (p.x_new[0] > this->upper_bound){ 
+                                p.x_new[0] = this->upper_bound;
+                                p.v[0] *= -1;
+                        }
+                        if (p.x_new[1] < this->lower_bound){
+                                p.x_new[1] = this->lower_bound;
+                                p.v[1] *= -1;
+                        }
+			if (p.x_new[1] > this->upper_bound){
+                                p.x_new[1] = this->upper_bound;
+                                p.v[1] *= -1;
+                        }
+                        if (p.x_new[2] < this->lower_bound){
+                                p.x_new[2] = this->lower_bound;
+                                p.v[2] *= -1;
+                        }
+			if (p.x_new[2] > this->upper_bound){
+                                p.x_new[2] = this->upper_bound;
+                                p.v[2] *= -1;
+                        }
 		}
 		std::cout << "\t\tCollision\n";
 	}
 
 	// Update Velocity
-	for(Particle &p: this->fluid){
-		p.dX = p.x_new - p.x;
-		p.v += p.dX / this->dt;
-	}
+	//for(Particle &p: this->fluid){
+	//	p.dX = p.x_new - p.x;
+	//	p.v += p.dX / this->dt;
+	//}
 
 	// Vorticity (O(n^2))
 	// apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon, this->dt);
@@ -166,6 +188,17 @@ void Fluid::step(Eigen::MatrixXd &fluid_state){
 	for (int i = 0; i < this->num_particles; i++){
 		fluid_state.row(i) = (this->fluid)[i].x;
 	}
+
+        for (int i = 0; i < num_particles; i++){
+                colors.row(i) << 0, 0, 1;
+        }
+        colors.row(0) << 1, 0, 0; // track particle 0 in red
+        for (auto n_idx : this->fluid[0].neighbours){
+                if (n_idx != 0){
+                        colors.row(n_idx) << 0, 1, 0; // track neighbours in green
+                }
+        }
+
 	this->t += this->dt;
 
 	std::cout << "\tUpdate\n";
