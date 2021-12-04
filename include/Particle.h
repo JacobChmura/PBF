@@ -6,7 +6,6 @@
 class Particle{
 public:
 	// Basic State Parameters
-	double m; 
 	double rho = 0;
 	Eigen::Vector3d x; // World Space Position
 	Eigen::Vector3d v; // Velocity
@@ -39,10 +38,9 @@ public:
 
         Input:
                 Eigen::Vector3d x_init: the initial position of the particle in the scene.
-                double m: the mass of the particle.
                 int global_idx: unique global index of the particle (indexes into shared fluid_state)
 	*/
-	Particle(Eigen::Vector3d X_init, double m, int global_idx);
+	Particle(Eigen::Vector3d X_init, int global_idx);
 };
 
 #endif

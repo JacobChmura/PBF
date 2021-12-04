@@ -60,9 +60,9 @@ void SpatialHashGrid::findNeighbours(Particle &p){
                                 // Check if there are particles in this hash
                                 if (this->cells.find(hashed_coord) != this->cells.end()){
 
-                                        // Add each one (not including the particle itself) as a neighbour
+                                        // Add each one (including yourself) as a neighbour
                                         for (auto particle_idx: cells[hashed_coord]){
-                                                if (particle_idx != p.global_idx) p.neighbours.insert(particle_idx);
+                                                p.neighbours.insert(particle_idx);
                                         }
                                 }
                         }
