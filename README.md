@@ -9,7 +9,8 @@ Position Based Fluid Simulation
 * ~~Barebones PBF Implementation (dam break)~~
 * ~~Implement multiple scenes~~
 * ~~UI Toggles~~
+* Cleanup
 * Viscocity / Vorticity working
-* Double dam break / particle ejector / manual external forces
+* particle ejector / manual external forces
 * Optimize
 * Aesthetics / Surfacing?
