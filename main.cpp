@@ -93,22 +93,22 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         simulation_thread.detach();
                 }
         }
-        elif (key == '0') { // restart a dam fall
+        else if (key == '0') { // restart a dam fall
                 pass; 
         }
-        elif (key == '1') { // restart a double dam fall
+        else if (key == '1') { // restart a double dam fall
                 pass; 
         }
-        elif (key == '2') { // restart a dam break
+        else if (key == '2') { // restart a dam break
                 pass; 
         }
-        elif (key == '3') { // restart a double dam break
+        else if (key == '3') { // restart a double dam break
                 pass; 
         }
-        elif (key == 'v') { // toggle vorticity confinement
+        else if (key == 'v') { // toggle vorticity confinement
                 pass; 
         }
-        elif (key == 'x') { // toggle XSPH viscocity
+        else if (key == 'x') { // toggle XSPH viscocity
                 pass; 
         }
         return false;
