@@ -5,9 +5,11 @@ Position Based Fluid Simulation
 
 * ~~Setup Simulation Framework~~
 * ~~Simulate gravity and collision detection with bounding box~~
-* Implement Spatial Hashing Grid for efficient Neighbourhood Finding
-* Barebones PBF Implementation (dam break) 
+* ~~Implement Spatial Hashing Grid for efficient Neighbourhood Finding~~
+* ~~Barebones PBF Implementation (dam break)~~
+* Implement multiple scenes
+* UI Toggles
 * Viscocity / Vorticity working
 * Double dam break / particle ejector / manual external forces
-* Aesthetics / Surfacing?
 * Optimize
+* Aesthetics / Surfacing?
