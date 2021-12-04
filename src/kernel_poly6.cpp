@@ -1,5 +1,5 @@
 #include <kernel_poly6.h>
-
+#include <iostream>
 double kernel_poly6(Particle &p_i, Particle &p_j, double h){
 	double result;
 	double r = (p_i.x_new - p_j.x_new).norm(); 
@@ -10,6 +10,7 @@ double kernel_poly6(Particle &p_i, Particle &p_j, double h){
 	else{
 		result = (315.0/(64.0*PI*pow(h, 9))) * pow((pow(h,2)-pow(r,2)), 3);
 	}
+
 	return result;
 }
 

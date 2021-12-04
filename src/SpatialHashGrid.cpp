@@ -57,7 +57,8 @@ void SpatialHashGrid::findNeighbours(Particle &p){
                                 hashed_coord = this->hash(neighbourhood_coord);
                                 if (this->cells.find(hashed_coord) != this->cells.end()){
                                         for (auto particle_idx: cells[hashed_coord]){
-                                                p.neighbours.insert(particle_idx);
+                                                // don't inckude yoursel
+                                                if (particle_idx != p.global_idx) p.neighbours.insert(particle_idx);
                                         }
                                 }
                         }

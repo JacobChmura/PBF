@@ -11,7 +11,6 @@ public:
 	double m; // particle mass (assumed identically 1 across all particles)
 	double rho = 0;
 	Eigen::Vector3d x; // World Space Position
-	Eigen::Vector3d X; // Undeformed Position
 	Eigen::Vector3d v; // Velocity
 	Eigen::Vector3d f; // Forces
 
@@ -24,7 +23,6 @@ public:
 	double lambda; // magnitude of force solving constraint gradient
 	double c_grad_neighorhood_norm; // 2-norm of constraint gradient accumulated over neighoring particles
 	Eigen::Vector3d dP; // total position update including corrections from neighbor particle density constraints
-	Eigen::Vector3d dX; // change in position 
 
 	Eigen::Vector3d x_new; // updated position
 	Eigen::Vector3d v_new; // updated velocity

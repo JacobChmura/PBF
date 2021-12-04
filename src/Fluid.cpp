@@ -63,7 +63,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 		}
 		else{
 			kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
-			c_grad_norm_ij = -1 * this->ker_res;
+			c_grad_norm_ij = - this->ker_res;
 		}
                 c_grad_norm_ij /= this->rho;
 		p_i.c_grad_neighorhood_norm += c_grad_norm_ij.norm();
@@ -75,18 +75,30 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 
 
 	// Apply External forces
+        //Eigen::Vector3d vel = this->fluid[0].v;
+        //Eigen::Vector3d x_pos = this->fluid[0].x;
+        //Eigen::Vector3d x_pos_new = this->fluid[0].x_new;
+        //std::cout << "Particle Velocity before Update: " << vel[1] << "\n";
+        //std::cout << "Particle x_new before Update: " << x_pos_new[1] << "\n"; 
+        //std::cout << "Particle x before Update: " << x_pos[1] << "\n"; 
+
 	for(Particle &p : this->fluid){
 		p.f.setZero();
 		
 		// Gravity Force
-		//p.f[1] = - p.m * this->gravity_f;
-                p.f = Eigen::Vector3d::Random();
+		p.f[1] = - p.m * this->gravity_f;
 
 		// User Force (TODO)
 		p.v += this->dt * p.f;
 		p.x_new = p.x + this->dt * p.v; 
 	}
 	std::cout << "\tApplied Externel forces.\n";
+        //vel = this->fluid[0].v;
+        //x_pos = this->fluid[0].x;
+        //x_pos_new = this->fluid[0].x_new;
+        //std::cout << "\nParticle Velocity After Gravity: " << vel[1] << "\n"; 
+        //std::cout << "Particle x_new After Gravity: " << x_pos_new[1] << "\n"; 
+        //std::cout << "Particle x After Gravity: " << x_pos[1] << "\n"; 
 
         // Get neighbours using spatial hash grid
         for(Particle &p: this->fluid){
@@ -96,7 +108,6 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
         
 	//Jacobi Loop (each component should be parrellized)
 	for(int i = 0; i < this->jacobi_iterations; i++){
-		std::cout << "\tJacobi Loop:\n";
 		// Compute densities
 		for(Particle &p_i : this->fluid){
 			p_i.rho = 0;
@@ -115,8 +126,15 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 		}
 
                 Particle p_first = this->fluid[0];
-                std::cout << "Rest Density: " << this->rho << " |  Particle Density: " << p_first.rho << " |  Constraint : " << p_first.c << " | Num neighbours: " << p_first.neighbours.size() << "\n"; 
-		//std::cout << "\t\tComputed Densities\n";
+                
+                //std::cout << "Rest Density: " << this->rho << " |  Particle Density: " << p_first.rho << " |  Constraint : " << p_first.c << " | Num neighbours: " << p_first.neighbours.size() << "\n"; 
+                //for (int particle_idx: p_first.neighbours){
+                //        Particle p_first_neighbour = this->fluid[particle_idx];
+                //        std::cout << "Neighbhour " << p_first_neighbour.global_idx << " |  Particle Density: " << p_first_neighbour.rho << " |  Constraint : " << p_first_neighbour.c << "\n"; 
+
+                //}
+
+		std::cout << "\t\tComputed Densities\n";
 		// Compute dP
 		for(Particle &p_i : this->fluid){
 			p_i.dP.setZero();
@@ -130,48 +148,66 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
                         p_i.dP /= this->rho;
 		}
                 p_first = this->fluid[0];
-                std::cout << "lambda: " << p_first.lambda << "dP norm: " << p_first.dP.norm() << " \n";
-		//std::cout << "\t\tComputed dP\n";
+                ///std::cout << "lambda: " << p_first.lambda << "\ndP norm: " << p_first.dP.norm() << " \n";
+                ///for (int particle_idx: p_first.neighbours){
+                ///        Particle p_first_neighbour = this->fluid[particle_idx];
+                ///        std::cout << "lambda: " << p_first_neighbour.lambda << "\ndP norm: " << p_first_neighbour.dP.norm() << " \n";
+
+                ///}
+                //exit(0);
+		std::cout << "\t\tComputed dP\n";
 		// Collision Detection with boundary box and solid (TODO)
 		for (Particle &p : this->fluid){
-			p.x_new += p.dP;
-
-			// Collision Detect correct p.x_new (naive)
+			p.x_new += 0.001 * p.dP;
+                        
+                        double damp = 1;
+			//Collision Detect correct p.x_new (naive)
 			if (p.x_new[0] < this->lower_bound){ 
                                 p.x_new[0] = this->lower_bound;
-                                p.v[0] *= -1;
+                                if (p.v[0] < 0) p.v[0] *= -damp;
 
                         }
                         if (p.x_new[0] > this->upper_bound){ 
                                 p.x_new[0] = this->upper_bound;
-                                p.v[0] *= -1;
+                                if (p.v[0] > 0) p.v[0] *= -damp;
                         }
                         if (p.x_new[1] < this->lower_bound){
                                 p.x_new[1] = this->lower_bound;
-                                p.v[1] *= -1;
+                                if (p.v[1] < 0) p.v[1] *= -damp;
                         }
 			if (p.x_new[1] > this->upper_bound){
                                 p.x_new[1] = this->upper_bound;
-                                p.v[1] *= -1;
+                                if (p.v[1] > 0) p.v[1] *= -damp;
                         }
                         if (p.x_new[2] < this->lower_bound){
                                 p.x_new[2] = this->lower_bound;
-                                p.v[2] *= -1;
+                                if (p.v[2] < 0) p.v[2] *= -damp;
                         }
 			if (p.x_new[2] > this->upper_bound){
                                 p.x_new[2] = this->upper_bound;
-                                p.v[2] *= -1;
+                                if (p.v[2] > 0) p.v[2] *= -damp;
                         }
 		}
-		std::cout << "\t\tCollision\n";
+		std::cout << "\t\tCollision Detection\n";
 	}
 
-	// Update Velocity
-	//for(Particle &p: this->fluid){
-	//	p.dX = p.x_new - p.x;
-	//	p.v += p.dX / this->dt;
-	//}
+        //vel = this->fluid[0].v;
+        //x_pos = this->fluid[0].x;
+        //x_pos_new = this->fluid[0].x_new;
+        //std::cout << "\nParticle Velocity After collision: " << vel[1] << "\n"; 
+        //std::cout << "Particle x_new After collision: " << x_pos_new[1] << "\n"; 
+        //std::cout << "Particle x After collision: " << x_pos[1] << "\n"; 
+	//Update Velocity
+	for(Particle &p: this->fluid){
+		p.v = (p.x_new - p.x) / this->dt;
+	}
 
+        //vel = this->fluid[0].v;
+        //x_pos = this->fluid[0].x;
+        //x_pos_new = this->fluid[0].x_new;
+        //std::cout << "\nParticle Velocity After update: " << vel[1] << "\n"; 
+        //std::cout << "Particle x_new After update: " << x_pos_new[1] << "\n"; 
+        //std::cout << "Particle x After update: " << x_pos[1] << "\n\n"; 
 	// Vorticity (O(n^2))
 	// apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon, this->dt);
 
@@ -201,5 +237,5 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 
 	this->t += this->dt;
 
-	std::cout << "\tUpdate\n";
+	//std::cout << "\tUpdate\n";
 }

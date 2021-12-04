@@ -10,7 +10,7 @@ double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
 
 // External Force Parameters
-double GRAVITY_F = 0.98;
+double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
@@ -34,14 +34,14 @@ double VISCOCITY_c = 0.01;
 double VORTICITY_EPSILON = 0.0005;
 
 // Simulation Parameters
-double dt = 0.001;
+double dt = 0.01;
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
 
 // dummy test
-int num_particles = 10;
+int num_particles = 1000;
 bool simulating = true; 
 
 
@@ -86,7 +86,14 @@ int main(int argc, char **argv) {
                 colors(i, 2) = 1;
         }
 	std::cout<<"Start PBF \n";
-
+        
+        // TEST
+        for (int i = 0; i < num_particles; i++){
+                fluid_state(i, 1) = 0;
+                if (fluid_state(i, 0) < 0){
+                        fluid_state(i, 0) = 0;
+                }
+        }
 	// --- Initialize setup ----
 	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	
 	M << UPPER_BOUND, UPPER_BOUND, UPPER_BOUND;
