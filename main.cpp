@@ -41,7 +41,7 @@ double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
 
 // dummy test
-int num_particles = 1000;
+int num_particles = 500;
 bool simulating = true; 
 
 
@@ -70,7 +70,7 @@ void simulate(){
 	while(simulating){
 		std::cout << "step.\n";
 		fluid.step(fluid_state, colors);
-                flag = getchar();
+                //flag = getchar();
 	}
 }
 
@@ -80,6 +80,39 @@ bool draw(igl::opengl::glfw::Viewer &viewer) {
     return false;
 }
 
+bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int modifiers){
+        if (key == ' '){ // pause / resume
+                if (simulating){
+                        std::cout << "Pausing Simulation.\n";
+                        simulating = false; 
+                }
+                else{
+                        std::cout << "Resuming Simulation.\n";
+                        simulating = true;
+                        std::thread simulation_thread(simulate);
+                        simulation_thread.detach();
+                }
+        }
+        elif (key == '0') { // restart a dam fall
+                pass; 
+        }
+        elif (key == '1') { // restart a double dam fall
+                pass; 
+        }
+        elif (key == '2') { // restart a dam break
+                pass; 
+        }
+        elif (key == '3') { // restart a double dam break
+                pass; 
+        }
+        elif (key == 'v') { // toggle vorticity confinement
+                pass; 
+        }
+        elif (key == 'x') { // toggle XSPH viscocity
+                pass; 
+        }
+        return false;
+}
 
 void build_scene(Eigen::MatrixXd &fluid_state, int simulation_type){ 
        
@@ -186,7 +219,7 @@ int main(int argc, char **argv) {
         }
 	std::cout<<"Start PBF \n";
         
-        build_scene(fluid_state, 2);
+        build_scene(fluid_state, 0);
 
 	// --- Initialize setup ----
 	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	
@@ -227,6 +260,7 @@ int main(int argc, char **argv) {
 	Visualize::add_object_to_scene(V_box, E_box, Eigen::RowVector3d(1, 0, 0));
 
 	Visualize::viewer().callback_post_draw = &draw;
+        Visualize::viewer().callback_key_down = &key_down_callback;
 	Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
 	Visualize::viewer().launch_rendering(true);
 	simulating = false;
