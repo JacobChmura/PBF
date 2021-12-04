@@ -160,7 +160,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
 		for (Particle &p : this->fluid){
 			p.x_new += 0.001 * p.dP;
                         
-                        double damp = 1;
+                        double damp = 5;
 			//Collision Detect correct p.x_new (naive)
 			if (p.x_new[0] < this->lower_bound){ 
                                 p.x_new[0] = this->lower_bound;
