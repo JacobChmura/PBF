@@ -41,7 +41,7 @@ double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
 
 // dummy test
-int num_particles = 500;
+int num_particles = 1000;
 bool simulating = true; 
 
 
@@ -70,8 +70,8 @@ void simulate(){
 	while(simulating){
 		std::cout << "step.\n";
 		fluid.step(fluid_state, colors);
-                //flag = getchar();
-	}
+                //flag = getchar(); 
+        }
 }
 
 bool draw(igl::opengl::glfw::Viewer &viewer) {
@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
         }
 	std::cout<<"Start PBF \n";
         
-        build_scene(fluid_state, 1);
+        build_scene(fluid_state, 0);
 
 	// --- Initialize setup ----
 	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	

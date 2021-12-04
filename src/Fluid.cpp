@@ -34,7 +34,7 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 	this->lower_bound = lower_bound;
 	this->upper_bound = upper_bound;
 
-        this->grid = SpatialHashGrid(lower_bound, upper_bound, kernel_h, num_particles);
+        this->grid = SpatialHashGrid(lower_bound, upper_bound, kernel_h);
 }	
 
 void Fluid::init_state(Eigen::MatrixXd &fluid_state){

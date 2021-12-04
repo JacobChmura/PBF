@@ -2,7 +2,7 @@
 #define PARTICLE
 
 #include <Eigen/Dense>
-
+#include <set>
 class Particle{
 public:
 	// Basic State Parameters

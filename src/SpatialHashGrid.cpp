@@ -1,31 +1,31 @@
 #include <SpatialHashGrid.h>
+
 #include <iostream>
 
 SpatialHashGrid::SpatialHashGrid(){
 }
 
-SpatialHashGrid::SpatialHashGrid(double l_bound, double u_bound, double cell_size, int num_particles){
+SpatialHashGrid::SpatialHashGrid(double l_bound, double u_bound, double cell_size){
         this->lower_bound << l_bound, l_bound, l_bound;
-        this->upper_bound << u_bound, u_bound, u_bound;
+        this->upper_bound << u_bound, u_bound, u_bound; 
         this->cell_size = cell_size;
-        this->table_size = 2 * num_particles;
+        this->range = u_bound - l_bound;
 }
 
 void SpatialHashGrid::insert(Particle &p){
         // Convert from world coordiantes to cell coordinates and hash
         Eigen::Vector3d cell_coord = this->WorldToCell(p.x);
-
         p.cell_coord = cell_coord;
         std::tuple<int, int, int> hashed_coord = this->hash(cell_coord);
 
-        //std::cout << "Particle: " << p.global_idx << "\nWorld Coord: " << p.x << "\nCell Coord: " << cell_coord << "\nHash: " << std::get<0>(hashed_coord) << ", " << std::get<1>(hashed_coord) << ", " << std::get<2>(hashed_coord) << "\n\n";
         if (this->cells.find(hashed_coord) == this->cells.end()){
                 // this key does not exist yet
                 this->cells[hashed_coord] = std::set<int>(); 
         }
-        // add
+        // Add the particle global index
         this->cells[hashed_coord].insert(p.global_idx);
               
+        //std::cout << "Particle: " << p.global_idx << "\nWorld Coord: " << p.x << "\nCell Coord: " << cell_coord << "\nHash: " << std::get<0>(hashed_coord) << ", " << std::get<1>(hashed_coord) << ", " << std::get<2>(hashed_coord) << "\n\n";
 }
 
 void SpatialHashGrid::remove(Particle &p){
@@ -40,24 +40,28 @@ void SpatialHashGrid::update(Particle &p){
 
 void SpatialHashGrid::findNeighbours(Particle &p){
         p.neighbours.clear(); // clear neighbours from previous iteration
-
-        Eigen::Vector3d cell_coord = this->WorldToCell(p.x_new); 
+       
+        // Store offset cell coordinate 
         Eigen::Vector3d neighbourhood_coord;
         std::tuple<int, int, int> hashed_coord;
+
+        // We use a cell granularity of (kernel_width) and loop through the neighbouring grid cells (conversative estimate on neighbours) 
+        Eigen::Vector3d cell_coord = this->WorldToCell(p.x_new); 
 
         // loop through 8 neighbourhing cells to find neighbours
         for (int dx = -1; dx <= 1; dx ++){
                 for (int dy = -1; dy <= 1; dy++){
                         for (int dz = -1; dz <= 1; dz ++){
-                                
+                                // Construct cell coordinate of the current neighbourhood 
                                 neighbourhood_coord << dx, dy, dz;
                                 neighbourhood_coord += cell_coord;
-                                neighbourhood_coord = neighbourhood_coord.cwiseMax(0).cwiseMin(this->table_size);
-       
                                 hashed_coord = this->hash(neighbourhood_coord);
+                                
+                                // Check if there are particles in this hash
                                 if (this->cells.find(hashed_coord) != this->cells.end()){
+
+                                        // Add each one (not including the particle itself) as a neighbour
                                         for (auto particle_idx: cells[hashed_coord]){
-                                                // don't inckude yoursel
                                                 if (particle_idx != p.global_idx) p.neighbours.insert(particle_idx);
                                         }
                                 }
@@ -67,15 +71,11 @@ void SpatialHashGrid::findNeighbours(Particle &p){
 }
 
 Eigen::Vector3d SpatialHashGrid::WorldToCell(Eigen::Vector3d world_coord){
-        Eigen::Vector3d cell_coord;
-        // Get value between 0 and 1
-        cell_coord[0] = (world_coord[0] - this->lower_bound[0]) / (this->upper_bound[0] - this->lower_bound[0]);
-        cell_coord[1] = (world_coord[1] - this->lower_bound[1]) / (this->upper_bound[1] - this->lower_bound[1]);
-        cell_coord[2] = (world_coord[2] - this->lower_bound[2]) / (this->upper_bound[2] - this->lower_bound[2]);
+        // Coordinates between 0 and 1 within grid
+        Eigen::Vector3d cell_coord = (world_coord - this->lower_bound) / this->range;
 
-        cell_coord[0] = floor(cell_coord[0] * ((this->upper_bound[0] - this->lower_bound[0] / this->cell_size) - 1));
-        cell_coord[1] = floor(cell_coord[1] * ((this->upper_bound[1] - this->lower_bound[1] / this->cell_size) - 1));
-        cell_coord[2] = floor(cell_coord[2] * ((this->upper_bound[2] - this->lower_bound[2] / this->cell_size) - 1));
+        // Cell number in each axis
+        cell_coord *= ((this->range / this->cell_size) - 1);
         return cell_coord;
 }
 
