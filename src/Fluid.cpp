@@ -1,6 +1,5 @@
 #include <Fluid.h>
-#include <kernel_poly6.h>
-#include <kernel_spiky.h>
+#include <kernel.h>
 #include <vorticity.h>
 #include <viscocity.h>
 

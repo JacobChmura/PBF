@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 #include <Particle.h>
 #include <vector>
-#include <kernel_spiky.h>
 /*
 Apply Vorticity Confinement to the simulated fluid. 
 

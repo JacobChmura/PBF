@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 #include <Particle.h>
 #include <vector>
-#include <kernel_poly6.h>
 
 /*
 Apply Viscocity Smoothing to the simulated fluid. 

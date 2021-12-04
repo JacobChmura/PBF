@@ -94,22 +94,16 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 }
         }
         else if (key == '0') { // restart a dam fall
-                pass; 
         }
         else if (key == '1') { // restart a double dam fall
-                pass; 
         }
         else if (key == '2') { // restart a dam break
-                pass; 
         }
         else if (key == '3') { // restart a double dam break
-                pass; 
         }
         else if (key == 'v') { // toggle vorticity confinement
-                pass; 
         }
         else if (key == 'x') { // toggle XSPH viscocity
-                pass; 
         }
         return false;
 }
@@ -219,7 +213,7 @@ int main(int argc, char **argv) {
         }
 	std::cout<<"Start PBF \n";
         
-        build_scene(fluid_state, 0);
+        build_scene(fluid_state, 1);
 
 	// --- Initialize setup ----
 	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	
