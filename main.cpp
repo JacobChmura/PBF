@@ -1,9 +1,8 @@
 #include <iostream>
-#include <Particle.h>
-#include <Eigen/Dense>
 #include <thread>
 #include <visualization.h>
 #include <Fluid.h>
+#include "setup.h"
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
@@ -43,16 +42,10 @@ double UPPER_BOUND = 1;
 // dummy test
 int num_particles = 500;
 bool simulating = true; 
+int SIMULATION_SCENE = 0;
 
-
-// Bounding box
-Eigen::Vector3d m;
-Eigen::Vector3d M;
-
-// Corners of the bounding box
+// Bounding box vertices and edges 
 Eigen::MatrixXd V_box(8,3);
-
-// Edges of the bounding box
 Eigen::MatrixXi E_box(12,2);
 
 // Global state
@@ -108,144 +101,18 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
         return false;
 }
 
-void build_scene(Eigen::MatrixXd &fluid_state, int simulation_type){ 
-       
-        switch(simulation_type){
-                case 0: { // dam fall
-                        double HI = 0.25;
-                        double LO = -0.25;
-                        double range = HI - LO;       
-                        
-                        fluid_state = (fluid_state + Eigen::MatrixXd::Constant(fluid_state.rows(), fluid_state.cols(), 1.))*range/2.;
-                        fluid_state = (fluid_state + Eigen::MatrixXd::Constant(fluid_state.rows(), fluid_state.cols(), LO));
-
-                        break;
-                }
-                case 1: {// double dam fall
-                        int num_particles_block_one = int(num_particles / 2);
-                        int num_particles_block_two = fluid_state.rows() - num_particles_block_one;
-
-                        Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
-                        Eigen::MatrixXd block_two = Eigen::MatrixXd::Random(num_particles_block_two, fluid_state.cols()); 
-
-                        double HI_block_one = 0.125;
-                        double LO_block_one = -0.125;
-                        double range_block_one = HI_block_one - LO_block_one;       
-                        
-                        double HI_block_two = 0.4;
-                        double LO_block_two = 0.15;
-                        double range_block_two = HI_block_one - LO_block_one;       
-
-                        block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), 1.))*range_block_one/2.;
-                        block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), LO_block_one));
-
-                        block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), 1.))*range_block_two/2.;
-                        block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), LO_block_two));
-
-                        fluid_state.block(0, 0, block_one.rows(), block_one.cols()) = block_one;
-                        fluid_state.block(num_particles_block_one, 0, block_two.rows(), block_two.cols()) = block_two;
-                        break;
-                }
-                case 2: {// dam break
-
-                        int num_particles_block_one = int(num_particles / 4);
-                        int num_particles_floor = fluid_state.rows() - num_particles_block_one;
-                       
-                        double HI_block_one = 0.125;
-                        double LO_block_one = -0.125;
-                        double range_block_one = HI_block_one - LO_block_one;       
-
-                        double HI_surface_x = 0.5;
-                        double LO_surface_x = -0.5;
-                        double range_surface_x = HI_surface_x - LO_surface_x;
-                        double HI_surface_y = -0.95;
-                        double LO_surface_y = -1;
-                        double range_surface_y = HI_surface_y - LO_surface_y;
-                        double HI_surface_z = 0.5;
-                        double LO_surface_z = -0.5;
-                        double range_surface_z = HI_surface_z - LO_surface_y;
-
-
-                        Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
-                        block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), 1.))*range_block_one/2.;
-                        block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), LO_block_one));
-
-
-                        Eigen::VectorXd surface_x = Eigen::VectorXd::Random(num_particles_floor);
-                        Eigen::VectorXd surface_y = Eigen::VectorXd::Random(num_particles_floor);
-                        Eigen::VectorXd surface_z = Eigen::VectorXd::Random(num_particles_floor);
-
-                        surface_x = (surface_x + Eigen::VectorXd::Constant(num_particles_floor, 1.))*range_surface_x/2;
-                        surface_x = (surface_x + Eigen::VectorXd::Constant(num_particles_floor, LO_surface_x));
-                        surface_y = (surface_y + Eigen::VectorXd::Constant(num_particles_floor, 1.))*range_surface_y/2;
-                        surface_y = (surface_y + Eigen::VectorXd::Constant(num_particles_floor, LO_surface_y));
-                        surface_z = (surface_z + Eigen::VectorXd::Constant(num_particles_floor, 1.))*range_surface_z/2;
-                        surface_z = (surface_z + Eigen::VectorXd::Constant(num_particles_floor, LO_surface_z));
-
-
-                        fluid_state.block(0, 0, block_one.rows(), block_one.cols()) = block_one;
-                        fluid_state.block(num_particles_block_one, 0, num_particles_floor, 1) = surface_x;
-                        fluid_state.block(num_particles_block_one, 1, num_particles_floor, 1) = surface_y;
-                        fluid_state.block(num_particles_block_one, 2, num_particles_floor, 1) = surface_z;
-                        break;
-                }
-                case 3: {// double dam break
-                        std::cout << "Not efficient enough for this right now.\n";
-                        break;
-                }
-                default: {
-                        std::cout << "Random Simulation State.\n";
-                }
-        } 
-}
-
-/* 
- 
-   scene types
-        dam fall: cube drops into nothing
-        dam break: cube drops into surface of water
-        double dam fall: two cubes drop into nothing
-        double dam fall: two cubes drop into surface of water
-*/
 int main(int argc, char **argv) {
         for (int i = 0; i < num_particles; i++){
                 colors(i, 2) = 1;
         }
 	std::cout<<"Start PBF \n";
-        
-        build_scene(fluid_state, 0);
 
 	// --- Initialize setup ----
-	m << LOWER_BOUND, LOWER_BOUND, LOWER_BOUND;	
-	M << UPPER_BOUND, UPPER_BOUND, UPPER_BOUND;
-
-	V_box <<
-	m(0), m(1), m(2),
-	M(0), m(1), m(2),
-	M(0), M(1), m(2),
-	m(0), M(1), m(2),
-	m(0), m(1), M(2),
-	M(0), m(1), M(2),
-	M(0), M(1), M(2),
-	m(0), M(1), M(2);
-	E_box <<
-	0, 1,
-	1, 2,
-	2, 3,
-	3, 0,
-	4, 5,
-	5, 6,
-	6, 7,
-	7, 4,
-	0, 4,
-	1, 5,
-	2, 6,
-	7 ,3;
+        setup(SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
+	fluid.init_state(fluid_state); 
 	// --------------------
-
-	fluid.init_state(fluid_state); // random init
         
-        /// for debugging
+        // Launch new thread for simulation
 	std::thread simulation_thread(simulate);
         simulation_thread.detach();
 
