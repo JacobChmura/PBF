@@ -4,6 +4,10 @@
 #include <viscocity.h>
 
 #include <iostream>
+#include <chrono>
+typedef std::chrono::high_resolution_clock Clock;
+
+#define DEBUG 1
 
 Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -13,7 +17,6 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 	this->particle_mass = particle_mass;
 	this->rho = rho;
 
-	this->gravity_f = gravity_f;
 	this->user_f = user_f;
 
 	this->jacobi_iterations = jacobi_iterations;
@@ -35,192 +38,174 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 	this->upper_bound = upper_bound;
 
         this->grid = SpatialHashGrid(lower_bound, upper_bound, kernel_h);
+
+
+        // testing vectorization
+        this->x_new.resize(num_particles, 3);
+        this->v.resize(num_particles, 3);
+        this->dP.resize(num_particles, 3);
+        this->omega.resize(num_particles, 3);
+        this->eta.resize(num_particles, 3);
+        this->N.resize(num_particles, 3);
+        this->vorticity_f.resize(num_particles, 3);
+        this->cell_coord.resize(num_particles, 3);
+
+        this->density.resize(num_particles);
+        this->c.resize(num_particles);
+        this->lambda.resize(num_particles);
+        this->c_grad_norm.resize(num_particles);
+
+        this->gravity_f = Eigen::VectorXd::Constant(num_particles, gravity_f);
+
+        std::vector<std::set<int>> neighbours_init(num_particles);
+        this->neighbours = neighbours_init;
+
 }	
 
 void Fluid::init_state(Eigen::MatrixXd &fluid_state){
-	this->fluid_state = fluid_state;
-              
-	for(int i = 0; i < this->num_particles; i++){
-		Particle p(fluid_state.row(i), i); // create particles
-		this->fluid.push_back(p); // push into global fluid state
-                this->grid.insert(p); // add to hash grid 
-	}
+        this->v.setZero();
+        this->grid.insert(fluid_state);
 }
 
 void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
-
-         /*
-         Inline function accumulates the constraint gradient for particle i with respect to particle j. See equation [8]
-
-         Input:
-                Particle p_i: the particle holding the constraint.
-                Particle p_j: a detected neighbour of p_i. Could be itself.
-         
-         Accumulates the constraint gradient norm into a field of particle p_i. 
-         */
-	auto accumulate_c_grad_norm = [&](Particle &p_i, Particle &p_j){
-		Eigen::Vector3d c_grad_norm_ij;
-		c_grad_norm_ij.setZero();
-                
-                // Case 1 in equation [8]
-		if (p_i.global_idx == p_j.global_idx){
-			for (int particle_idx : p_i.neighbours){
-                                Particle p_k = this->fluid[particle_idx];
-				kernel_spiky(this->ker_res, p_i, p_k, this->kernel_h);
-				c_grad_norm_ij += this->ker_res;
-			}
-		}
-                // Case 2 in equation [8]
-		else{
-			kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
-			c_grad_norm_ij = - this->ker_res;
-		}
-                c_grad_norm_ij /= this->rho;
-		p_i.c_grad_neighorhood_norm += c_grad_norm_ij.norm();
-	};
-
-        /*
-        Inline function computes artifical pressure correction term. See equation [13]
-
-        Input: 
-                Particle p_i, p_j: the particles to compute the pressure term for. 
-        */
-	auto compute_s_corr = [&](double &s_corr, Particle &p_i, Particle &p_j){
-		s_corr = - this->tensile_k * pow(kernel_poly6(p_i, p_j, this->kernel_h) / kernel_poly6(this->tensile_delta_q, this->kernel_h), this->tensile_n);
-	};
-
+        auto t0 = Clock::now();
 
 	// Apply External forces
-	for(Particle &p : this->fluid){
-		p.f.setZero();
-		
-		// Gravity Force
-		p.f[1] = - this->particle_mass * this->gravity_f;
+        this->v.col(1) -= this->particle_mass * this->gravity_f;
+        this->x_new = fluid_state + this->dt * this->v;
 
-		// User Force (TODO)
-
-		p.v += this->dt * p.f;
-		p.x_new = p.x + this->dt * p.v; 
-	}
-	//std::cout << "\tApplied Externel forces.\n";
+        auto t1 = Clock::now();
+        if (DEBUG) std::cout << "\n------------------------------------------\nApplied Externel forces [" << std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count() << " s]\n";
 
         // Get neighbours using spatial hash grid
-        for(Particle &p: this->fluid){
-                this->grid.findNeighbours(p);
-        }
-	//std::cout << "\tFound neighbors.\n";
-        
-	//Jacobi Loop (each component should be parrellized)
+        this->grid.findNeighbours(this->x_new, this->neighbours);
+
+        auto t2 = Clock::now();
+        if (DEBUG) std::cout << "Found Neighbours [" << std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count() << " s]\n";
+
+	//Jacobi Loop 
 	for(int i = 0; i < this->jacobi_iterations; i++){
-		// Compute densities
-		for(Particle &p_i : this->fluid){
-			p_i.rho = 0;
-			p_i.lambda = 0;
-			p_i.c_grad_neighorhood_norm = 0;
+                // reset jacobi state
+                this->density.setZero();
+                this->lambda.setZero();
+                this->c_grad_norm.setZero();
 
-			// Compute density estimate 
-			for(int particle_idx: p_i.neighbours){
-                                Particle p_j = this->fluid[particle_idx];
-				p_i.rho += this->particle_mass * kernel_poly6(p_i, p_j, this->kernel_h);
-				accumulate_c_grad_norm(p_i, p_j);
-			}
-			// Compute constraint lambda
-			p_i.c = (p_i.rho / this->rho) - 1;
-			p_i.lambda = - p_i.c / (p_i.c_grad_neighorhood_norm + this->cfm_epsilon);
-		}
+                Eigen::Vector3d c_grad_temp;
+                
+                for(int p_i = 0; p_i < this->num_particles; p_i++){
+                        
+                        // compute densities
+                        
+                        for(int p_j : this->neighbours[i]){
+                                auto t20 = Clock::now();
+                                this->density[p_i] += this->particle_mass * kernel_poly6(this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
 
-                //Particle p_first = this->fluid[0];
-                //std::cout << "Rest Density: " << this->rho << " |  Particle Density: " << p_first.rho << " |  Constraint : " << p_first.c << " | Num neighbours: " << p_first.neighbours.size() << "\n"; 
-                //for (int particle_idx: p_first.neighbours){
-                //        Particle p_first_neighbour = this->fluid[particle_idx];
-                //        std::cout << "Neighbhour " << p_first_neighbour.global_idx << " |  Particle Density: " << p_first_neighbour.rho << " |  Constraint : " << p_first_neighbour.c << "\n"; 
+                                auto t21 = Clock::now();
+                                if (DEBUG) std::cout << "\t Density add [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t21 - t20).count() << " s]\n";
 
-                //}
-		//std::cout << "\t\tComputed Densities\n";
+                                // accumulate gradient norm
+                                c_grad_temp.setZero();
+                                if (p_i == p_j){
+                                        for(int p_k : this->neighbours[p_i]){
+                                               kernel_spiky(this->ker_res, this->x_new.row(p_i), this->x_new.row(p_k), this->kernel_h);
+                                               c_grad_temp += this->ker_res;
+                                        }
+                                }
+                                else{
+                                        kernel_spiky(this->ker_res, this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
+                                        c_grad_temp = this->ker_res;
+                                }
+
+                                this->c_grad_norm[i] += (c_grad_temp / this->rho).norm();
+                                auto t22 = Clock::now();
+                                if (DEBUG) std::cout << "\t C grad norm [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t22 - t21).count() << " s]\n";
+                                break;
+                        }
+
+                        auto t22 = Clock::now();
+                        // Compute constraint and lambda
+                        this->c[p_i] = (this->density[p_i] / this->rho) - 1;
+                        this->lambda[p_i] = -this->c[p_i] / (this->c_grad_norm[p_i] + this->cfm_epsilon);
+                        auto t23 = Clock::now();
+                        if (DEBUG) std::cout << "\t Constraint [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t23 - t22).count() << " s]\n";
+                        break;
+                }
+
+                auto t3 = Clock::now();
+                if (DEBUG) std::cout << "Computed Constraints [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " s]\n";
 
 		// Compute dP
-		for(Particle &p_i : this->fluid){
-			p_i.dP.setZero();
+                this->dP.setZero();
+                for(int p_i = 0; p_i < this->num_particles; p_i++){
+                        for(int p_j : this->neighbours[i]){
+                                //kernel_spiky(this->ker_res, this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
+                                //// precompute this denominator
 
-			for(int particle_idx : p_i.neighbours){
-                                Particle p_j = this->fluid[particle_idx];
-				kernel_spiky(this->ker_res, p_i, p_j, this->kernel_h);
-				compute_s_corr(this->s_corr, p_i, p_j);
-				p_i.dP += (p_i.lambda + p_j.lambda + this->s_corr) * this->ker_res;
-			}
-                        p_i.dP /= this->rho;
-		}
-                //p_first = this->fluid[0];
-                ///std::cout << "lambda: " << p_first.lambda << "\ndP norm: " << p_first.dP.norm() << " \n";
-                ///for (int particle_idx: p_first.neighbours){
-                ///        Particle p_first_neighbour = this->fluid[particle_idx];
-                ///        std::cout << "lambda: " << p_first_neighbour.lambda << "\ndP norm: " << p_first_neighbour.dP.norm() << " \n";
+		                //this->s_corr = - this->tensile_k * pow(kernel_poly6(this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h) / kernel_poly6(this->tensile_delta_q, this->kernel_h), this->tensile_n);
+                                //this->dP.row(p_i) += (this->lambda[p_i] + this->lambda[p_j] + this->s_corr) * this->ker_res; 
+                        }
+                        //this->dP.row(p_i) /= this->rho;
+                }
 
-                ///}
-                //exit(0);
-		//std::cout << "\t\tComputed dP\n";
+                auto t4 = Clock::now();
+                if (DEBUG) std::cout << "Computed Position Correction [" << std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count() << " s]\n";
 
 		// Collision Detection with boundary box and solid
-		for (Particle &p : this->fluid){
-			p.x_new += 0.005 * p.dP; // TODO CALIBRATE SIMULATION
+                for(int p_i = 0; p_i < this->num_particles; p_i++){
+			this->x_new.row(p_i) += 0.005 * this->dP.row(p_i); // TODO CALIBRATE SIMULATION
                         
 			//Collision Detect correct p.x_new (naive)
-			if (p.x_new[0] < this->lower_bound){ 
-                                p.x_new[0] = this->lower_bound;
-                                if (p.v[0] < 0) p.v[0] *= -1;
+			if (this->x_new.row(p_i)[0] < this->lower_bound){ 
+                                this->x_new.row(p_i)[0] = this->lower_bound;
+                                if (this->v(p_i, 0) < 0) this->v(p_i, 0) *= -1;
                         }
-                        if (p.x_new[0] > this->upper_bound){ 
-                                p.x_new[0] = this->upper_bound;
-                                if (p.v[0] > 0) p.v[0] *= -1;
+			if (this->x_new.row(p_i)[0] > this->upper_bound){ 
+                                this->x_new.row(p_i)[0] = this->upper_bound;
+                                if (this->v(p_i, 0) > 0) this->v(p_i, 0) *= -1;
                         }
-                        if (p.x_new[1] < this->lower_bound){
-                                p.x_new[1] = this->lower_bound;
-                                if (p.v[1] < 0) p.v[1] *= -1;
+			if (this->x_new.row(p_i)[1] < this->lower_bound){ 
+                                this->x_new.row(p_i)[1] = this->lower_bound;
+                                if (this->v(p_i, 1) < 0) this->v(p_i, 1) *= -1;
                         }
-			if (p.x_new[1] > this->upper_bound){
-                                p.x_new[1] = this->upper_bound;
-                                if (p.v[1] > 0) p.v[1] *= -1;
+			if (this->x_new.row(p_i)[1] > this->upper_bound){ 
+                                this->x_new.row(p_i)[1] = this->upper_bound;
+                                if (this->v(p_i, 1) > 0) this->v(p_i, 1) *= -1;
                         }
-                        if (p.x_new[2] < this->lower_bound){
-                                p.x_new[2] = this->lower_bound;
-                                if (p.v[2] < 0) p.v[2] *= -1;
+			if (this->x_new.row(p_i)[2] < this->lower_bound){ 
+                                this->x_new.row(p_i)[2] = this->lower_bound;
+                                if (this->v(p_i, 2) < 0) this->v(p_i, 2) *= -1;
                         }
-			if (p.x_new[2] > this->upper_bound){
-                                p.x_new[2] = this->upper_bound;
-                                if (p.v[2] > 0) p.v[2] *= -1;
+			if (this->x_new.row(p_i)[2] > this->upper_bound){ 
+                                this->x_new.row(p_i)[2] = this->upper_bound;
+                                if (this->v(p_i, 2) > 0) this->v(p_i, 2) *= -1;
                         }
-		}
-		//std::cout << "\t\tCollision Detection\n";
+                }
+                auto t5 = Clock::now();
+                if (DEBUG) std::cout << "Collision Detection [" << std::chrono::duration_cast<std::chrono::seconds>(t5 - t4).count() << " s]\n";
 	}
 
 	//Update Velocity
-	for(Particle &p: this->fluid){
-		p.v = (p.x_new - p.x) / this->dt;
-	}
+        this->v = (this->x_new - fluid_state) / this->dt;
 
 	// Vorticity (O(n^2))
 	// apply_vorticity(this->fluid, this->kernel_h, this->vorticity_epsilon, this->dt);
-
-	//	apply_viscocity(this->fluid, this->kernel_h, this->viscocity_c);
+	// apply_viscocity(this->fluid, this->kernel_h, this->viscocity_c);
 
 
 	// Update Position and spatial hash grid
-	for (Particle &p : this->fluid){
-		p.x = p.x_new;
-                this->grid.update(p);
-	}
+        fluid_state = this->x_new;
+        this->grid.update(fluid_state);
 
-	// Write to global state
-	for (int i = 0; i < this->num_particles; i++){
-		fluid_state.row(i) = (this->fluid)[i].x;
-	}
+
+        auto t6 = Clock::now();
+        if (DEBUG) std::cout << "Simulation Step Total Time [" << std::chrono::duration_cast<std::chrono::seconds>(t6 - t0).count() << " s]\n----------------------------------------\n";
 
         // Debugging using colors for now.
         for (int i = 0; i < num_particles; i++){
                 colors.row(i) << 0, 0, 1; 
         }
         colors.row(0) << 1, 0, 0; // track particle 0 in red
-        for (auto n_idx : this->fluid[0].neighbours){
+        for (auto n_idx : this->neighbours[0]){
                 if (n_idx != 0){
                         colors.row(n_idx) << 0, 1, 0; // track neighbours in green
                 }

@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <tuple>
+#include <vector>
 #include <Particle.h>
 
 class SpatialHashGrid{
@@ -29,15 +30,7 @@ public:
         Input: 
                 Particle p: the particle to insert.
         */
-        void insert(Particle &p);
-
-        /* Remove the particle p from the grid. Requires looking up the cached cell hash and 
-         * deleting the particle global index from the set of indices at that hash.
-
-        Input: 
-                Particle p: the particle to remove.
-        */
-        void remove(Particle &p);
+        void insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 
         /* After each simulation step, we need to update our cell grid. Currently this is done by 
          * removing all particles from the grid and inserting them again. This should be optimized.
@@ -45,7 +38,7 @@ public:
         Input: 
                 Particle p: the particle to update.
         */
-        void update(Particle &p);
+        void update(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 
         /* Find Neighours for particle p using the predicted position for the jacobi update, 
          * and update the p.neighbours set to reflect the (possibly) new neighbours.
@@ -53,7 +46,7 @@ public:
         Input:
                 Particle p: the particle to find neighbours for.
         */  
-        void findNeighbours(Particle &p);
+        void findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::set<int>> &neighbours);
         
 private:
         

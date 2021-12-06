@@ -4,21 +4,29 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <vector>
-#include <Particle.h>
 #include <SpatialHashGrid.h>
 #include <Eigen/Dense>
 
 class Fluid{
 public:
-	// Basic State Parameters
-	std::vector<Particle> fluid; // Particles comprising the fluid system
-	Eigen::MatrixXd fluid_state;
+	// Global State Parameters
+        // Matrices are of size (num_particles x 3) store vector quantities for each particles
+        // Vectors of size (num_particles) store scalar quantities for each particles
+        // -----
+        
+        Eigen::MatrixXd x_new, v, dP, omega, eta, N, vorticity_f, cell_coord;
+        Eigen::VectorXd density, c, lambda, c_grad_norm, gravity_f;
+        std::vector<std::set<int>> neighbours;
+
+        // ----
+	//std::vector<Particle> fluid; // Particles comprising the fluid system
+	//Eigen::MatrixXd fluid_state;
         SpatialHashGrid grid; // spatial hash grid for efficient neighbourhood search
 	int num_particles;
 
 	double particle_mass; // Mass of each particle
 	double rho; // Rest density
-	double gravity_f; // Force of gravity on the system
+	//double gravity_f; // Force of gravity on the system
 	double user_f; // Force of user applied force on the system
 
 	// Jacobi Parameters

@@ -33,14 +33,14 @@ double VISCOCITY_c = 0.01;
 double VORTICITY_EPSILON = 0.0005;
 
 // Simulation Parameters
-double dt = 0.01;
+double dt = 0.001;
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
 
 // dummy test
-int num_particles = 500;
+int num_particles = 10000;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
 
@@ -61,7 +61,7 @@ Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 void simulate(){
         int flag;
 	while(simulating){
-		std::cout << "step.\n";
+		//std::cout << "step.\n";
 		fluid.step(fluid_state, colors);
                 //flag = getchar(); 
         }
