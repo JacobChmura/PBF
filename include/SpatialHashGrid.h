@@ -46,7 +46,7 @@ public:
         Input:
                 Particle p: the particle to find neighbours for.
         */  
-        void findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::set<int>> &neighbours);
+        void findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours);
         
 private:
         

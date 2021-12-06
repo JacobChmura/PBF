@@ -35,7 +35,7 @@ void SpatialHashGrid::update(const Eigen::Ref<const Eigen::MatrixXd> &fluid_stat
         this->insert(fluid_state); 
 }
 
-void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::set<int>> &neighbours){
+void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours){
         // Store offset cell coordinate 
         Eigen::Vector3d neighbourhood_coord, cell_coord;
         std::tuple<int, int, int> hashed_coord;
@@ -61,7 +61,7 @@ void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_
 
                                                 // Add each one (including yourself) as a neighbour
                                                 for (auto particle_idx: cells[hashed_coord]){
-                                                        neighbours[i].insert(particle_idx);
+                                                        neighbours[i].push_back(particle_idx);
                                                 }
                                         }
                                 }

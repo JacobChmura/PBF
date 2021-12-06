@@ -57,7 +57,7 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 
         this->gravity_f = Eigen::VectorXd::Constant(num_particles, gravity_f);
 
-        std::vector<std::set<int>> neighbours_init(num_particles);
+        std::vector<std::vector<int>> neighbours_init(num_particles);
         this->neighbours = neighbours_init;
 
 }	
@@ -97,11 +97,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
                         // compute densities
                         
                         for(int p_j : this->neighbours[i]){
-                                auto t20 = Clock::now();
                                 this->density[p_i] += this->particle_mass * kernel_poly6(this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
-
-                                auto t21 = Clock::now();
-                                if (DEBUG) std::cout << "\t Density add [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t21 - t20).count() << " s]\n";
 
                                 // accumulate gradient norm
                                 c_grad_temp.setZero();
@@ -117,34 +113,27 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
                                 }
 
                                 this->c_grad_norm[i] += (c_grad_temp / this->rho).norm();
-                                auto t22 = Clock::now();
-                                if (DEBUG) std::cout << "\t C grad norm [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t22 - t21).count() << " s]\n";
-                                break;
                         }
 
-                        auto t22 = Clock::now();
                         // Compute constraint and lambda
                         this->c[p_i] = (this->density[p_i] / this->rho) - 1;
                         this->lambda[p_i] = -this->c[p_i] / (this->c_grad_norm[p_i] + this->cfm_epsilon);
-                        auto t23 = Clock::now();
-                        if (DEBUG) std::cout << "\t Constraint [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t23 - t22).count() << " s]\n";
-                        break;
                 }
 
                 auto t3 = Clock::now();
-                if (DEBUG) std::cout << "Computed Constraints [" << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " s]\n";
+                if (DEBUG) std::cout << "Computed Constraints [" << std::chrono::duration_cast<std::chrono::seconds>(t3 - t2).count() << " s]\n";
 
 		// Compute dP
                 this->dP.setZero();
                 for(int p_i = 0; p_i < this->num_particles; p_i++){
                         for(int p_j : this->neighbours[i]){
-                                //kernel_spiky(this->ker_res, this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
-                                //// precompute this denominator
+                                kernel_spiky(this->ker_res, this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h);
+                                // precompute this denominator
 
-		                //this->s_corr = - this->tensile_k * pow(kernel_poly6(this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h) / kernel_poly6(this->tensile_delta_q, this->kernel_h), this->tensile_n);
-                                //this->dP.row(p_i) += (this->lambda[p_i] + this->lambda[p_j] + this->s_corr) * this->ker_res; 
+		                this->s_corr = - this->tensile_k * pow(kernel_poly6(this->x_new.row(p_i), this->x_new.row(p_j), this->kernel_h) / kernel_poly6(this->tensile_delta_q, this->kernel_h), this->tensile_n);
+                                this->dP.row(p_i) += (this->lambda[p_i] + this->lambda[p_j] + this->s_corr) * this->ker_res; 
                         }
-                        //this->dP.row(p_i) /= this->rho;
+                        this->dP.row(p_i) /= this->rho;
                 }
 
                 auto t4 = Clock::now();

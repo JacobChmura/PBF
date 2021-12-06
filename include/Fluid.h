@@ -16,7 +16,7 @@ public:
         
         Eigen::MatrixXd x_new, v, dP, omega, eta, N, vorticity_f, cell_coord;
         Eigen::VectorXd density, c, lambda, c_grad_norm, gravity_f;
-        std::vector<std::set<int>> neighbours;
+        std::vector<std::vector<int>> neighbours;
 
         // ----
 	//std::vector<Particle> fluid; // Particles comprising the fluid system

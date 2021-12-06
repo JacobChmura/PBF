@@ -40,7 +40,7 @@ double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
 
 // dummy test
-int num_particles = 10000;
+int num_particles = 1000;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
 
