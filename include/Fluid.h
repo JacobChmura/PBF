@@ -15,7 +15,7 @@ public:
         // -----
         
         Eigen::MatrixXd x_new, v, dP, omega, eta, N, vorticity_f, cell_coord;
-        Eigen::VectorXd density, c, lambda, c_grad_norm, gravity_f;
+        Eigen::VectorXd density, c, lambda, c_grad_norm, gravity_f, user_f;
         std::vector<std::vector<int>> neighbours;
 
         // ----
@@ -27,7 +27,7 @@ public:
 	double particle_mass; // Mass of each particle
 	double rho; // Rest density
 	//double gravity_f; // Force of gravity on the system
-	double user_f; // Force of user applied force on the system
+//	double user_f; // Force of user applied force on the system
 
 	// Jacobi Parameters
 	int jacobi_iterations;
@@ -118,7 +118,7 @@ public:
                 Eigen::MatrixXd &fluid_state: pointer the global fluid state matrix we modify.
                 Eigen::MatrixXd &colors: FOR DEBUGGING neighbhours.
         */	
-	void step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors);
+	void step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::Vector3d mouse_pos, bool add_user_force);
 
 };
 

@@ -7,7 +7,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 1
+#define DEBUG 0
 
 Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -16,8 +16,6 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
         this->num_particles = num_particles;
 	this->particle_mass = particle_mass;
 	this->rho = rho;
-
-	this->user_f = user_f;
 
 	this->jacobi_iterations = jacobi_iterations;
 
@@ -54,6 +52,7 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
         this->c_grad_norm.resize(num_particles);
 
         this->gravity_f = Eigen::VectorXd::Constant(num_particles, gravity_f);
+        this->user_f = Eigen::VectorXd::Constant(num_particles, user_f);
 
         std::vector<std::vector<int>> neighbours_init(num_particles);
         this->neighbours = neighbours_init;
@@ -67,11 +66,18 @@ void Fluid::init_state(Eigen::MatrixXd &fluid_state){
         grid.update(fluid_state);
 }
 
-void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
+void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::Vector3d mouse_pos, bool add_user_force){
         auto t0 = Clock::now();
 
 	// Apply External forces
         v.col(1) -= particle_mass * gravity_f;
+        
+        // Apply User Foces if applicable
+        Eigen::MatrixXd test = (-fluid_state).rowwise() + mouse_pos.transpose();
+        test.rowwise().normalize();
+        if (add_user_force) v += particle_mass * user_f(0) * test;
+        
+        // Predict next time step position
         x_new = fluid_state + dt * v;
 
         auto t1 = Clock::now();

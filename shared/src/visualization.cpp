@@ -1,4 +1,5 @@
 #include <visualization.h> 
+#include <iostream>
 
 //libigl viewer
 namespace Visualize {
@@ -8,6 +9,9 @@ namespace Visualize {
     
     Eigen::VectorXd const *g_fluid_state;
     Eigen::VectorXd const *g_velocity;
+
+    Eigen::Vector3d g_mouse_win;
+
 }
 
 igl::opengl::glfw::Viewer & Visualize::viewer() { return g_viewer; }
@@ -40,3 +44,8 @@ void Visualize::update_vertex_positions(Eigen::Ref<const Eigen::MatrixXd> pos, E
 }
 
 
+// mouse events 
+void Visualize::get_mouse_down_pos(igl::opengl::glfw::Viewer &viewer, Eigen::Vector3d& mouse_pos){
+        g_mouse_win = Eigen::Vector3d(g_viewer.current_mouse_x, viewer.core().viewport(3) - g_viewer.current_mouse_y, 0.);
+        igl::unproject(g_mouse_win, g_viewer.core().view, g_viewer.core().proj, g_viewer.core().viewport, mouse_pos);
+}

@@ -8,7 +8,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 500;
+int num_particles = 100;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -56,11 +56,17 @@ Eigen::MatrixXd fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
 Eigen::MatrixXd colors = Eigen::MatrixXd::Zero(num_particles, 3);
 Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 
+
+// test mouse
+Eigen::Vector3d mouse_pos;
+bool add_user_force;
+bool user_force_mode;
+
 void simulate(){
         int flag;
 	while(simulating){
 		//std::cout << "step.\n";
-		fluid.step(fluid_state, colors);
+		fluid.step(fluid_state, colors, mouse_pos, add_user_force);
                 //flag = getchar(); 
         }
 }
@@ -69,6 +75,17 @@ bool draw(igl::opengl::glfw::Viewer &viewer) {
     //update vertex positions using simulation
     Visualize::update_vertex_positions(fluid_state, colors);
     return false;
+}
+
+bool mouse_down(igl::opengl::glfw::Viewer &viewer, int x, int y){
+        Visualize::get_mouse_down_pos(viewer, mouse_pos);
+        if (user_force_mode) add_user_force  = true;
+        return false;
+}
+
+bool mouse_up(igl::opengl::glfw::Viewer &viewer, int x, int y){
+        add_user_force = false;
+        return false;
 }
 
 bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int modifiers){
@@ -96,10 +113,12 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 simulating = true;
                 std::thread simulation_thread(simulate);
                 simulation_thread.detach();
-
         }
         else if (key == '3') { // restart a double dam break
                 //todo
+        }
+        else if (key == '4'){ // toggle user force mode
+                user_force_mode = !user_force_mode;
         }
         else if (key == 'v') { // toggle vorticity confinement
         }
@@ -128,6 +147,11 @@ int main(int argc, char **argv) {
 
 	Visualize::viewer().callback_post_draw = &draw;
         Visualize::viewer().callback_key_down = &key_down_callback;
+
+        // user force
+        Visualize::viewer().callback_mouse_down = &mouse_down;
+        Visualize::viewer().callback_mouse_up = &mouse_up;
+
 	Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
 	Visualize::viewer().launch_rendering(true);
 	simulating = false;
