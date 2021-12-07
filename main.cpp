@@ -3,6 +3,7 @@
 #include <visualization.h>
 #include <Fluid.h>
 #include "setup.h"
+#include <unistd.h>
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
@@ -83,13 +84,22 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         simulation_thread.detach();
                 }
         }
-        else if (key == '0') { // restart a dam fall
-        }
-        else if (key == '1') { // restart a double dam fall
-        }
-        else if (key == '2') { // restart a dam break
+        else if (key == '0' || key == '1' || key == '2') { // restart a dam fall
+                simulating = false;
+
+                sleep(1); // not sure about this
+                std::cout << "Restarting simulation " << key << std::endl;
+                fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
+                setup(key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
+                fluid.init_state(fluid_state); 
+
+                simulating = true;
+                std::thread simulation_thread(simulate);
+                simulation_thread.detach();
+
         }
         else if (key == '3') { // restart a double dam break
+                //todo
         }
         else if (key == 'v') { // toggle vorticity confinement
         }

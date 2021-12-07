@@ -148,32 +148,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors){
                                         x_new.row(p_i)[axis] = upper_bound;
                                         if (v(p_i, axis) > 0) v(p_i, axis) *= -1;
                                 }
-                        
                         }
-			//if (x_new.row(p_i)[0] < lower_bound){ 
-                        //        x_new.row(p_i)[0] = lower_bound;
-                        //        if (v(p_i, 0) < 0) v(p_i, 0) *= -1;
-                        //}
-			//if (x_new.row(p_i)[0] > upper_bound){ 
-                        //        x_new.row(p_i)[0] = upper_bound;
-                        //        if (v(p_i, 0) > 0) v(p_i, 0) *= -1;
-                        //}
-			//if (x_new.row(p_i)[1] < lower_bound){ 
-                        //        x_new.row(p_i)[1] = lower_bound;
-                        //        if (v(p_i, 1) < 0) v(p_i, 1) *= -1;
-                        //}
-			//if (x_new.row(p_i)[1] > upper_bound){ 
-                        //        x_new.row(p_i)[1] = upper_bound;
-                        //        if (v(p_i, 1) > 0) v(p_i, 1) *= -1;
-                        //}
-			//if (x_new.row(p_i)[2] < lower_bound){ 
-                        //        x_new.row(p_i)[2] = lower_bound;
-                        //        if (v(p_i, 2) < 0) v(p_i, 2) *= -1;
-                        //}
-			//if (x_new.row(p_i)[2] > upper_bound){ 
-                        //        x_new.row(p_i)[2] = upper_bound;
-                        //        if (v(p_i, 2) > 0) v(p_i, 2) *= -1;
-                        //}
                 }
                 auto t5 = Clock::now();
                 if (DEBUG) std::cout << "Collision Detection [" << std::chrono::duration_cast<std::chrono::seconds>(t5 - t4).count() << " s]\n";
