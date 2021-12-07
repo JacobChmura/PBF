@@ -59,7 +59,9 @@ public:
 
 	// Temp variables
 	Eigen::Vector3d ker_res;
+        Eigen::Vector3d c_grad_temp;
 	double s_corr;
+        double tensile_stability_denom; // denom of equation 13
 
 public:
 	

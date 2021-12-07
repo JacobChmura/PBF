@@ -1,4 +1,3 @@
-#include <Particle.h>
 #include <Eigen/Dense>
 #include <cmath>
 

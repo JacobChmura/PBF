@@ -7,7 +7,6 @@
 #include <set>
 #include <tuple>
 #include <vector>
-#include <Particle.h>
 
 class SpatialHashGrid{
 
@@ -24,13 +23,6 @@ public:
         SpatialHashGrid(); // default constructor
         SpatialHashGrid(double l_bound, double u_bound, double cell_size);
 
-        /* Insert the particle p into the grid. Requires finding the cell that it is contained in, 
-         * then adding the particle global index into this hash.
-
-        Input: 
-                Particle p: the particle to insert.
-        */
-        void insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 
         /* After each simulation step, we need to update our cell grid. Currently this is done by 
          * removing all particles from the grid and inserting them again. This should be optimized.
@@ -85,6 +77,14 @@ private:
                                                 simply converting the input to a tuple. 
         */
         std::tuple<int, int, int> hash(Eigen::Vector3d cell_coord);
+
+        /* Insert the particle p into the grid. Requires finding the cell that it is contained in, 
+         * then adding the particle global index into this hash.
+
+        Input: 
+                Particle p: the particle to insert.
+        */
+        void insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include <Eigen/Dense>
-#include <Particle.h>
 #include <vector>
 /*
 Apply Vorticity Confinement to the simulated fluid. 
@@ -12,4 +11,4 @@ Input:
 Output:
 	modifies the velocity of each particle in the fluid by adding forces due to vorticity.
 */
-void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt);
+//void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt);

@@ -7,6 +7,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
+int num_particles = 500;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -34,15 +35,12 @@ double VORTICITY_EPSILON = 0.0005;
 
 // Simulation Parameters
 double dt = 0.001;
+bool simulating = true; 
+int SIMULATION_SCENE = 0;
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
 double UPPER_BOUND = 1;
-
-// dummy test
-int num_particles = 1000;
-bool simulating = true; 
-int SIMULATION_SCENE = 0;
 
 // Bounding box vertices and edges 
 Eigen::MatrixXd V_box(8,3);
@@ -56,7 +54,6 @@ Fluid fluid(num_particles, PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATI
 Eigen::MatrixXd fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
 Eigen::MatrixXd colors = Eigen::MatrixXd::Zero(num_particles, 3);
 Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
-// --------------
 
 void simulate(){
         int flag;
@@ -107,10 +104,9 @@ int main(int argc, char **argv) {
         }
 	std::cout<<"Start PBF \n";
 
-	// --- Initialize setup ----
+	// Initialize setup
         setup(SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
 	fluid.init_state(fluid_state); 
-	// --------------------
         
         // Launch new thread for simulation
 	std::thread simulation_thread(simulate);
@@ -127,3 +123,4 @@ int main(int argc, char **argv) {
 	simulating = false;
 	Visualize::viewer().launch_shut();
 }
+

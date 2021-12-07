@@ -1,6 +1,6 @@
 #include <vorticity.h>
 #include <kernel.h>
-void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt){
+//void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt){
 	//Eigen::Vector3d ker_res;
 
 	//// Compute curl
@@ -28,4 +28,4 @@ void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorti
 	//	p_i.v += dt * p_i.vorticity_f;
 	//}
 
-}
+//}

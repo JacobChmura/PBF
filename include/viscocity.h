@@ -1,5 +1,4 @@
 #include <Eigen/Dense>
-#include <Particle.h>
 #include <vector>
 
 /*
@@ -13,4 +12,4 @@ Input:
 Output:
 	modifies the velocity of each particle in the fluid by performing viscocity smoothing.
 */
-void apply_viscocity(std::vector<Particle> &fluid, double kernel_h, double viscocity_c);
+//void apply_viscocity(std::vector<Particle> &fluid, double kernel_h, double viscocity_c);

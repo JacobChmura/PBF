@@ -27,8 +27,6 @@ void SpatialHashGrid::insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_stat
 
 
 void SpatialHashGrid::update(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state){
-        //for (auto const &[key, value] : this->cells) value.clear();
-        //for (std::pair<std::tuple<int, int, int>, std::set<int>> element : this->cells){
         for(auto &element: this->cells){
                 element.second.clear();
         }
