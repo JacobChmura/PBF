@@ -2,6 +2,9 @@
 #define SETUP_H
 
 #include <Eigen/Dense>
+#include <iostream>
+#include <map>
+#include <string>
 
 /*
 Main setup function. Called when program is launched.
@@ -27,7 +30,9 @@ Modifies:
         Eigen::MatrixXd &V_box, E_box: containg the geometry of the bounding box.
 */
 void setup(int simulation_scene, double lower_bound, double upper_bound, 
-                Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &V_box, Eigen::MatrixXi &E_box){
+                Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &V_box, Eigen::MatrixXi &E_box, std::string simulation_scene_str){
+
+        std::cout << "\n=========== POSITION BASED FLUIDS:  " << simulation_scene_str << " =============\n\tPause Simulation\t\t [SpaceBar]\n\tRestart Dam Fall\t\t [0]\n\tRestart Dam Break\t\t [1]\n\tRestart Double Dam Fall\t\t [2]\n\tRestart Double Dam Break\t [3]\n\n\tToggle User Force Mode\t\t [4]\n\tToggle Vorticity Confinement\t [5]\n\tToggle XPSH Viscocity\t\t [6]\n========================================================\n";
 
         int num_particles = fluid_state.rows();
         // Boundary box geometry

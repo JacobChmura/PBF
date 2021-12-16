@@ -40,7 +40,7 @@ double VORTICITY_EPSILON = 0.001;
 double dt = 0.001;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
-std::map<char, std::string> SIMULATION_MODE = {{'0', "Dam Fall"}, {'1', "Dam Break"}, {'2', "Double Dam Fall"}, {'3', "Double Dam Break"}};
+std::map<int, std::string> SIMULATION_MODE = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}};
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
@@ -110,9 +110,9 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 simulating = false;
 
                 sleep(1); // not sure about this
-                std::cout << "Restarting simulation " << SIMULATION_MODE[key] << std::endl;
+                std::cout << "Restarting simulation " << SIMULATION_MODE[key-'0'] << std::endl;
                 fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
-                setup(key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
+                setup(key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[key-'0']);
                 fluid.init_state(fluid_state); 
 
                 simulating = true;
@@ -153,13 +153,22 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
 }
 
 int main(int argc, char **argv) {
+
+        // Parse command line arguments
+        if (argc > 1){
+                if (argc > 2){
+                        std::cerr << "Usage: " << argv[0] << " SIMULATION SCENE" << std::endl;
+                        return 1;
+                }
+
+                SIMULATION_SCENE = std::stoi(argv[1]);
+        }
         for (int i = 0; i < num_particles; i++){
                 colors(i, 2) = 1;
         }
-	std::cout<<"Start PBF \n";
 
 	// Initialize setup
-        setup(SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
+        setup(SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[SIMULATION_SCENE]);
 	fluid.init_state(fluid_state); 
         
         // Launch new thread for simulation
