@@ -14,7 +14,7 @@ public:
         // Vectors of size (num_particles) store scalar quantities for each particles
         // -----
         
-        Eigen::MatrixXd x_new, v, dP, omega, eta, N, vorticity_f, cell_coord;
+        Eigen::MatrixXd x_new, v, v_new, dP, omega, eta, N, vorticity_f, cell_coord;
         Eigen::VectorXd density, c, lambda, c_grad_norm, gravity_f, user_f;
         std::vector<std::vector<int>> neighbours;
 
@@ -118,7 +118,7 @@ public:
                 Eigen::MatrixXd &fluid_state: pointer the global fluid state matrix we modify.
                 Eigen::MatrixXd &colors: FOR DEBUGGING neighbhours.
         */	
-	void step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::Vector3d mouse_pos, bool add_user_force);
+	void step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::Vector3d mouse_pos, bool add_user_force, bool use_viscocity, bool use_vorticity);
 
 };
 

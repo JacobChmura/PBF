@@ -8,7 +8,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 100;
+int num_particles = 500;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -29,7 +29,7 @@ double TENSILE_delta_q = 0.2 * KERNEL_h;
 int TENSILE_n = 4;
 
 // Visocity Parameters
-double VISCOCITY_c = 0.01;
+double VISCOCITY_c = 0.001;
 
 // Vorticity Parameters
 double VORTICITY_EPSILON = 0.0005;
@@ -61,12 +61,14 @@ Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 Eigen::Vector3d mouse_pos;
 bool add_user_force;
 bool user_force_mode;
+bool use_viscocity;
+bool use_vorticity;
 
 void simulate(){
         int flag;
 	while(simulating){
 		//std::cout << "step.\n";
-		fluid.step(fluid_state, colors, mouse_pos, add_user_force);
+		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
                 //flag = getchar(); 
         }
 }
@@ -120,9 +122,11 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
         else if (key == '4'){ // toggle user force mode
                 user_force_mode = !user_force_mode;
         }
-        else if (key == 'v') { // toggle vorticity confinement
+        else if (key == '5') { // toggle vorticity confinement
+                use_vorticity = !use_vorticity;
         }
-        else if (key == 'x') { // toggle XSPH viscocity
+        else if (key == '6') { // toggle XSPH viscocity
+                use_viscocity = !use_viscocity;
         }
         return false;
 }

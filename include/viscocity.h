@@ -12,4 +12,4 @@ Input:
 Output:
 	modifies the velocity of each particle in the fluid by performing viscocity smoothing.
 */
-//void apply_viscocity(std::vector<Particle> &fluid, double kernel_h, double viscocity_c);
+void apply_viscocity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> & neighbours, Eigen::MatrixXd &v, Eigen::MatrixXd &v_new, double viscocity_c, double kernel_h);
