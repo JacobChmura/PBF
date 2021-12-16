@@ -10,6 +10,7 @@ Position Based Fluid Simulation
 * ~~Implement multiple scenes~~
 * ~~UI Toggles~~
 * ~~Apply External Forces with mouse~~
-* Viscocity / Vorticity working
+* ~~Viscocity / Vorticity working~~
 * Optimize
+* GPU
 * Aesthetics / Surfacing?
