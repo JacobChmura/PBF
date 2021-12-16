@@ -7,7 +7,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 1
+#define DEBUG 0
 
 Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -167,7 +167,9 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
         
         // Vorticity and Viscocity
         auto t6 = Clock::now();
-        //if (use_vorticity) apply_vorticity(fluid, kernel_h, vorticity_epsilon, dt);
+
+        if (use_vorticity) apply_vorticity(x_new, neighbours, v, omega, eta, N, vorticity_f, vorticity_epsilon, kernel_h, dt);
+        
         auto t7 = Clock::now();
         if (DEBUG) std::cout << "Vorticity [" << std::chrono::duration_cast<std::chrono::milliseconds>(t7 - t6).count() << " s]\n";
 
@@ -178,7 +180,6 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 	// Update Position and spatial hash grid
         fluid_state = x_new;
         grid.update(fluid_state);
-
 
         auto t9 = Clock::now();
         if (DEBUG) std::cout << "Simulation Step Total Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(t9 - t0).count() << " s]\n----------------------------------------\n";

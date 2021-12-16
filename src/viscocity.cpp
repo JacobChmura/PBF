@@ -7,7 +7,7 @@ void apply_viscocity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector
         v_new = v;
         for(int p_i = 0; p_i < num_particles; p_i++){
                 for(int p_j : neighbours[p_i]){
-                        v_new.row(p_i) += viscocity_c * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h) * (v.row(p_i) - v.row(p_j));
+                        v_new.row(p_i) += viscocity_c * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h) * (v.row(p_j) - v.row(p_i));
                 } 
         }
 

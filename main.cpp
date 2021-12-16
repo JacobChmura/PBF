@@ -4,11 +4,13 @@
 #include <Fluid.h>
 #include "setup.h"
 #include <unistd.h>
+#include <map>
+#include <string>
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 500;
+int num_particles = 100;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -32,12 +34,13 @@ int TENSILE_n = 4;
 double VISCOCITY_c = 0.001;
 
 // Vorticity Parameters
-double VORTICITY_EPSILON = 0.0005;
+double VORTICITY_EPSILON = 0.001;
 
 // Simulation Parameters
 double dt = 0.001;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
+std::map<char, std::string> SIMULATION_MODE = {{'0', "Dam Fall"}, {'1', "Dam Break"}, {'2', "Double Dam Fall"}, {'3', "Double Dam Break"}};
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
@@ -103,11 +106,11 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         simulation_thread.detach();
                 }
         }
-        else if (key == '0' || key == '1' || key == '2') { // restart a dam fall
+        else if (key == '0' || key == '1' || key == '2') { // restart a simulation
                 simulating = false;
 
                 sleep(1); // not sure about this
-                std::cout << "Restarting simulation " << key << std::endl;
+                std::cout << "Restarting simulation " << SIMULATION_MODE[key] << std::endl;
                 fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
                 setup(key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box);
                 fluid.init_state(fluid_state); 
@@ -121,12 +124,30 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
         }
         else if (key == '4'){ // toggle user force mode
                 user_force_mode = !user_force_mode;
+                if(user_force_mode){
+                        std::cout << "User Force Mode Enabled.\n";
+                }
+                else{
+                        std::cout << "User Force Mode Disabled.\n";
+                }
         }
         else if (key == '5') { // toggle vorticity confinement
                 use_vorticity = !use_vorticity;
+                if(use_vorticity){
+                        std::cout << "Vorticity Enabled.\n";
+                }
+                else{
+                        std::cout << "Vorticity Disabled.\n";
+                }
         }
         else if (key == '6') { // toggle XSPH viscocity
                 use_viscocity = !use_viscocity;
+                if(use_viscocity){
+                        std::cout << "Viscocity Enabled.\n";
+                }
+                else{
+                        std::cout << "Viscocity Disabled.\n";
+                }
         }
         return false;
 }

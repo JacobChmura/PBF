@@ -1,31 +1,37 @@
 #include <vorticity.h>
 #include <kernel.h>
-//void apply_vorticity(std::vector<Particle> &fluid, double kernel_h, double vorticity_epsilon, double dt){
-	//Eigen::Vector3d ker_res;
 
-	//// Compute curl
-	//for (Particle &p_i : fluid){
-	//	p_i.omega.setZero();
+void apply_vorticity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours, Eigen::MatrixXd &v, Eigen::MatrixXd omega, Eigen::MatrixXd eta, Eigen::MatrixXd N, Eigen::MatrixXd vorticity_f, double vorticity_epsilon, double kernel_h, double dt){
+        Eigen::Vector3d ker_res;
+        Eigen::Vector3d tmp_vec1, tmp_vec2; // for cross product ... should be refactored 
+        int num_particles = x_new.rows();
+        
+        omega.setZero();
+        eta.setZero();
+        N.setZero();
+        // Compute curl
+        for(int p_i = 0; p_i < num_particles; p_i++){
+                for(int p_j: neighbours[p_i]){
+                        kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
+                        tmp_vec1 = v.row(p_j) - v.row(p_i);
+                        tmp_vec2 = ker_res;
+                        omega.row(p_i) += tmp_vec1.cross(tmp_vec2); 
+                }
+        }
 
-	//	for(Particle &p_j : fluid){
-	//		kernel_spiky(ker_res, p_i, p_j, kernel_h);
-	//		p_i.omega += (p_j.v - p_i.v).cross(ker_res);
-	//	}
-	//}
+        // Compute differential operator norm
+        for(int p_i = 0; p_i < num_particles; p_i++){
+                for(int p_j: neighbours[p_i]){
+                        kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
+                        eta.row(p_i) += omega.row(p_j).norm() * ker_res;
+                }
+                if (eta.row(p_i).norm() > 0){
+                        N.row(p_i) = eta.row(p_i) / eta.row(p_i).norm();
+                }
+                tmp_vec1 = N.row(p_i);
+                tmp_vec2 = omega.row(p_i);
+                vorticity_f.row(p_i) = vorticity_epsilon * tmp_vec1.cross(tmp_vec2); 
+        }
 
-	//// Compute differential operator norm
-	//for (Particle &p_i : fluid){
-	//	p_i.eta.setZero();
-
-	//	for(Particle &p_j : fluid){
-	//		kernel_spiky(ker_res, p_i, p_j, kernel_h);
-	//		p_i.eta += p_j.omega.norm() * ker_res;
-	//	}
-	//	p_i.N = p_i.eta / p_i.eta.norm();
-
-	//	// Get vorticity corrective force and update velocity
-	//	p_i.vorticity_f = vorticity_epsilon * p_i.N.cross(p_i.omega);
-	//	p_i.v += dt * p_i.vorticity_f;
-	//}
-
-//}
+        v += dt * vorticity_f;
+}
