@@ -10,7 +10,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 100;
+int num_particles = 1000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -106,7 +106,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         simulation_thread.detach();
                 }
         }
-        else if (key == '0' || key == '1' || key == '2') { // restart a simulation
+        else if (key == '0' || key == '1' || key == '2' || key == '3') { // restart a simulation
                 simulating = false;
 
                 sleep(1); // not sure about this
@@ -118,9 +118,6 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 simulating = true;
                 std::thread simulation_thread(simulate);
                 simulation_thread.detach();
-        }
-        else if (key == '3') { // restart a double dam break
-                //todo
         }
         else if (key == '4'){ // toggle user force mode
                 user_force_mode = !user_force_mode;
