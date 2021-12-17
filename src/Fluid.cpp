@@ -7,7 +7,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 1
+#define DEBUG 0
 
 Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -109,57 +109,57 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
                 //std::cout << "Neighbours MATRIX\n" << NEIGHBOURS_MATRIX << std::endl;
                 
-                Eigen::MatrixXd C_GRAD_PAIRWISE_SERIAL = Eigen::MatrixXd::Constant(num_particles, num_particles, 0.);;
-                Eigen::MatrixXd POLY_6_SERIAL = Eigen::MatrixXd::Constant(num_particles, num_particles, 0.);
+                // Eigen::MatrixXd C_GRAD_PAIRWISE_SERIAL = Eigen::MatrixXd::Constant(num_particles, num_particles, 0.);;
+                // Eigen::MatrixXd POLY_6_SERIAL = Eigen::MatrixXd::Constant(num_particles, num_particles, 0.);
 
 
-                auto serial_start = Clock::now();
-                for(int p_i = 0; p_i < num_particles; p_i++){
+                // auto serial_start = Clock::now();
+                // for(int p_i = 0; p_i < num_particles; p_i++){
                         
-                        // compute densities
-                        for(int p_j : neighbours[p_i]){
-                                POLY_6_SERIAL(p_i, p_j) = kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h);
+                //         // compute densities
+                //         for(int p_j : neighbours[p_i]){
+                //                 POLY_6_SERIAL(p_i, p_j) = kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h);
 
-                                density[p_i] += particle_mass * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h);
+                //                 density[p_i] += particle_mass * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h);
 
-                                // if (p_i == 0){
-                                // // SUM OF NORM IS NOT NORM OF SUM
-                                //         std::cout << "Particle : " << p_i << ", " << p_j << " density add term " << particle_mass * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h) << std::endl;
-                                // }
+                //                 // if (p_i == 0){
+                //                 // // SUM OF NORM IS NOT NORM OF SUM
+                //                 //         std::cout << "Particle : " << p_i << ", " << p_j << " density add term " << particle_mass * kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h) << std::endl;
+                //                 // }
 
 
-                                // accumulate gradient norm
-                                c_grad_temp.setZero();
+                //                 // accumulate gradient norm
+                //                 c_grad_temp.setZero();
 
-                                // DEBUGGING!!!
-                                if (p_i == p_j){
-                                //if (true){ 
-                                        for(int p_k : neighbours[p_i]){
-                                               kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_k), kernel_h);
-                                               c_grad_temp += ker_res;
-                                               if (p_i == 1){
-                                                // SUM OF NORM IS NOT NORM OF SUM
-                                                      //  std::cout << "Particle : " << p_i << ", " << p_k << " ker res norm: / rho " << ker_res.norm() / rho << std::endl;
-                                               }
-                                        }
-                                        C_GRAD_PAIRWISE_SERIAL(p_i, p_j) = (c_grad_temp / rho).norm();
-                                }
-                                else{
-                                        kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
-                                        c_grad_temp = ker_res;
+                //                 // DEBUGGING!!!
+                //                 if (p_i == p_j){
+                //                 //if (true){ 
+                //                         for(int p_k : neighbours[p_i]){
+                //                                kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_k), kernel_h);
+                //                                c_grad_temp += ker_res;
+                //                                if (p_i == 1){
+                //                                 // SUM OF NORM IS NOT NORM OF SUM
+                //                                       //  std::cout << "Particle : " << p_i << ", " << p_k << " ker res norm: / rho " << ker_res.norm() / rho << std::endl;
+                //                                }
+                //                         }
+                //                         C_GRAD_PAIRWISE_SERIAL(p_i, p_j) = (c_grad_temp / rho).norm();
+                //                 }
+                //                 else{
+                //                         kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
+                //                         c_grad_temp = ker_res;
 
-                                        //std::cout << "Particle : " << p_i << ", " << p_j << " ker res norm: " << ker_res.norm() << std::endl;
-                                }
+                //                         //std::cout << "Particle : " << p_i << ", " << p_j << " ker res norm: " << ker_res.norm() << std::endl;
+                //                 }
 
                                 
-                                c_grad_norm[p_i] += (c_grad_temp / rho).norm();
-                        }
+                //                 c_grad_norm[p_i] += (c_grad_temp / rho).norm();
+                //         }
 
-                        // Compute constraint and lambda
-                        c[p_i] = (density[p_i] / rho) - 1;
-                        lambda[p_i] = -c[p_i] / (c_grad_norm[p_i] + cfm_epsilon);
+                //         // Compute constraint and lambda
+                //         c[p_i] = (density[p_i] / rho) - 1;
+                //         lambda[p_i] = -c[p_i] / (c_grad_norm[p_i] + cfm_epsilon);
 
-                }
+                // }
 
                 // auto serial = Clock::now();
                 //std::cout << "Serial -> " << std::chrono::duration_cast<std::chrono::milliseconds>(serial - serial_start).count() << " s]\n";
@@ -168,7 +168,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                 // ======================= VECTORIZED OPS ========================
 
                 // --------- Stuff we can PreCompute --------
-                auto vec_time_0 = Clock::now();
+                //auto vec_time_0 = Clock::now();
 
                 Eigen::VectorXd ONES = Eigen::VectorXd::Constant(num_particles, 1.);
                 Eigen::ArrayXXd ONES_BLOCK = Eigen::ArrayXXd::Constant(num_particles, num_particles, 1.);
@@ -184,8 +184,8 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                 off_diag_boolean.diagonal().setZero();
                 Eigen::ArrayXXd OFF_DIAG_BOOLEAN = off_diag_boolean;
 
-                auto vec_time_1 = Clock::now();
-                std::cout << "Pre-Step Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_1 - vec_time_0).count() << " ms]\n";
+                //auto vec_time_1 = Clock::now();
+                //std::cout << "Pre-Step Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_1 - vec_time_0).count() << " ms]\n";
 
                 // --------- Distance Matrix --------------
                 Eigen::ArrayXXd DISTANCE_MATRIX;
@@ -196,69 +196,73 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
                 Eigen::ArrayXXd DISTANCE_WITHIN_KERNEL_MASK;
                 DISTANCE_WITHIN_KERNEL_MASK = (kernel_h - DISTANCE_MATRIX < 0).select(ZEROS_BLOCK, ONES_BLOCK);
-                auto vec_time_2 = Clock::now();
-                std::cout << "Distance Matrix Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_2 - vec_time_1).count() << " ms]\n";
+                //auto vec_time_2 = Clock::now();
+                //std::cout << "Distance Matrix Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_2 - vec_time_1).count() << " ms]\n";
 
                 // ---------------Poly 6 kernel ------------
                 Eigen::ArrayXXd POLY_6 =  NEIGHBOURS_MATRIX * DISTANCE_WITHIN_KERNEL_MASK * (poly6_prefactor * (kernel_h_matrix.square() - DISTANCE_MATRIX.square()).cube());
 
-                auto vec_time_3 = Clock::now();
-                std::cout << "Poly6 Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_3 - vec_time_2).count() << " ms]\n";
+                //auto vec_time_3 = Clock::now();
+               //std::cout << "Poly6 Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_3 - vec_time_2).count() << " ms]\n";
 
 
                 // ------------Density / Constraint ---------
                 Eigen::ArrayXd DENSITY_RESULT = (particle_mass * POLY_6).rowwise().sum();
                 Eigen::ArrayXd CONSTRAINT_RESULT = inverse_rho * DENSITY_RESULT - 1.;
 
-                auto vec_time_4 = Clock::now();
-                std::cout << "Constraint Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_4 - vec_time_3).count() << " ms]\n";
+                //auto vec_time_4 = Clock::now();
+                //std::cout << "Constraint Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_4 - vec_time_3).count() << " ms]\n";
                 
 
-                std::cout << "\n\n";
+               // std::cout << "\n\n";
                 
-                std::cout << "\t\t Poly 6 Diff: " << (POLY_6_SERIAL - POLY_6.matrix()).norm() << std::endl;
+               // std::cout << "\t\t Poly 6 Diff: " << (POLY_6_SERIAL - POLY_6.matrix()).norm() << std::endl;
                 //std::cout << "Poly 6 Serial: \n" << POLY_6_SERIAL << std::endl;
               //  std::cout << "Poly 6 Vector: \n" << POLY_6 << std::endl;
 
 
 
-                if (POLY_6.hasNaN()){
-                        std::cout << "Distance Matrix: " << DISTANCE_MATRIX << "\n\n";
+                // if (POLY_6.hasNaN()){
+                //         std::cout << "Distance Matrix: " << DISTANCE_MATRIX << "\n\n";
 
-                        std::cout << "DISTANCE_MATRIX pre square root:\n" << (NORM + NORM.transpose() - 2 * XXt) << std::endl;
-                        exit(0);
-                }
-                std::cout << "\t\tDensity Diff: " << (density - DENSITY_RESULT.matrix()).norm() << std::endl;
+                //         std::cout << "DISTANCE_MATRIX pre square root:\n" << (NORM + NORM.transpose() - 2 * XXt) << std::endl;
+                //         exit(0);
+                // }
+                //std::cout << "\t\tDensity Diff: " << (density - DENSITY_RESULT.matrix()).norm() << std::endl;
                // std::cout << "Density Serial: \n" << density.transpose() << std::endl;
                // std::cout << "Density Vector: \n" << DENSITY_RESULT.transpose() << std::endl;
 
-                std::cout << "\t\tConstraint Diff: " << (CONSTRAINT_RESULT.matrix() - c).norm() << std::endl;
+              //  std::cout << "\t\tConstraint Diff: " << (CONSTRAINT_RESULT.matrix() - c).norm() << std::endl;
                // std::cout << "Constraints Serial: \n" << c.transpose() << std::endl;
                 //std::cout << "Constraint Vector: \n" << CONSTRAINT_RESULT.transpose() << std::endl;
-                std::cout << "\n\n";
+              //  std::cout << "\n\n";
                 //exit(0);
                 // ----------- Off diag spiky -------------
-                Eigen::ArrayXXd SPIKY_MATRIX_OFF_DIAG = DISTANCE_WITHIN_KERNEL_MASK * (spiky_prefactor * (kernel_h_matrix - DISTANCE_MATRIX).square());
-                SPIKY_MATRIX_OFF_DIAG *= (inverse_rho * OFF_DIAG_BOOLEAN);
+
+                Eigen::ArrayXXd SPIKY_MATRIX_SHARED = DISTANCE_WITHIN_KERNEL_MASK * (spiky_prefactor * (kernel_h_matrix - DISTANCE_MATRIX).square());
+
+
+
+                Eigen::ArrayXXd SPIKY_MATRIX_OFF_DIAG = inverse_rho * OFF_DIAG_BOOLEAN * SPIKY_MATRIX_SHARED;
+                //SPIKY_MATRIX_OFF_DIAG *= (inverse_rho * OFF_DIAG_BOOLEAN);
   
-                auto vec_time_5 = Clock::now();
-                std::cout << "Off diag Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_5 - vec_time_4).count() << " ms]\n";
+               // auto vec_time_5 = Clock::now();
+               // std::cout << "Off diag Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_5 - vec_time_4).count() << " ms]\n";
 
 
 
                 // ----------- On Diag Spiky ---------------
                 Eigen::ArrayXXd NON_SELF_NEIGHBOURS = NEIGHBOURS_MATRIX * OFF_DIAG_BOOLEAN;
                 
-                Eigen::ArrayXXd SPIKY_MATRIX_ON_DIAG = DISTANCE_WITHIN_KERNEL_MASK * (spiky_prefactor * (kernel_h_matrix - DISTANCE_MATRIX).square());
-                SPIKY_MATRIX_ON_DIAG *= (inverse_rho * NON_SELF_NEIGHBOURS);
+                Eigen::ArrayXXd SPIKY_MATRIX_ON_DIAG = inverse_rho * NON_SELF_NEIGHBOURS * SPIKY_MATRIX_SHARED;
                 SPIKY_MATRIX_ON_DIAG = (SPIKY_MATRIX_ON_DIAG.rowwise().sum());
 
                 // Full spiky matrix
                 Eigen::MatrixXd spiky_matrix_on_diag = SPIKY_MATRIX_ON_DIAG.matrix().asDiagonal();
                 Eigen::ArrayXXd SPIKY_MATRIX = (SPIKY_MATRIX_OFF_DIAG + spiky_matrix_on_diag.array());
 
-                auto vec_time_6 = Clock::now();
-                std::cout << "On diag Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_6 - vec_time_5).count() << " ms]\n";
+                //auto vec_time_6 = Clock::now();
+                //std::cout << "On diag Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_6 - vec_time_5).count() << " ms]\n";
 
 
 
@@ -267,11 +271,11 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                 Eigen::ArrayXd DENOM = (C_GRAD_RESULT + CFM_EPS_VECTOR).inverse();
                 Eigen::ArrayXd LAMBDA_VECTORIZED = - CONSTRAINT_RESULT * DENOM;
   
-                auto vec_time_7 = Clock::now();
-                std::cout << "Lambda Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_7 - vec_time_6).count() << " ms]\n";
+                //auto vec_time_7 = Clock::now();
+               // std::cout << "Lambda Compute Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(vec_time_7 - vec_time_6).count() << " ms]\n";
 
-                auto vector = Clock::now();
-                std::cout << "Vector -> " << std::chrono::duration_cast<std::chrono::milliseconds>(vector - vec_time_1).count() << " s]\n";
+                //auto vector = Clock::now();
+                //std::cout << "Vector -> " << std::chrono::duration_cast<std::chrono::milliseconds>(vector - vec_time_1).count() << " s]\n";
                 
                 lambda = LAMBDA_VECTORIZED;
                 c = C_GRAD_RESULT;
@@ -281,45 +285,46 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
 
 
-                // ------- DP ---------------------
+                //------- DP ---------------------
+  //              std::cout << "\n\n";
 
-                //auto serial_dp_start = Clock::now();
+  //               auto serial_dp_start = Clock::now();
 
-                Eigen::ArrayXXd SERIAL_S_CORR = Eigen::ArrayXXd::Constant(num_particles, num_particles, 0.);
+  //               Eigen::ArrayXXd SERIAL_S_CORR = Eigen::ArrayXXd::Constant(num_particles, num_particles, 0.);
 
-		//Compute dP
-                Eigen::ArrayXXd test_weights = Eigen::ArrayXXd::Constant(num_particles, num_particles, 0.);
-                dP.setZero();
-                for(int p_i = 0; p_i < num_particles; p_i++){
-                        for(int p_j : neighbours[p_i]){
-                                kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
+		// //Compute dP
+  //               Eigen::ArrayXXd test_weights = Eigen::ArrayXXd::Constant(num_particles, num_particles, 0.);
+  //               dP.setZero();
+  //               for(int p_i = 0; p_i < num_particles; p_i++){
+  //                       for(int p_j : neighbours[p_i]){
+  //                               kernel_spiky(ker_res, x_new.row(p_i), x_new.row(p_j), kernel_h);
 
-		                s_corr = - tensile_k * pow(kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h), tensile_n) / tensile_stability_denom;
-                                SERIAL_S_CORR(p_i, p_j) = s_corr;
+		//                 s_corr = - tensile_k * pow(kernel_poly6(x_new.row(p_i), x_new.row(p_j), kernel_h), tensile_n) / tensile_stability_denom;
+  //                               SERIAL_S_CORR(p_i, p_j) = s_corr;
                                 
-                                dP.row(p_i) += (lambda[p_i] + lambda[p_j] + s_corr) * ker_res; 
-                                test_weights(p_i, p_j) = lambda[p_i] + lambda[p_j] + s_corr;
-                        }
-                        dP.row(p_i) /= rho;
-                }
+  //                               dP.row(p_i) += (lambda[p_i] + lambda[p_j] + s_corr) * ker_res; 
+  //                               test_weights(p_i, p_j) = lambda[p_i] + lambda[p_j] + s_corr;
+  //                       }
+  //                       dP.row(p_i) /= rho;
+  //               }
 
-                //auto serial_dp_end = Clock::now();
-                //std::cout << "Serial DP Compute Time:  [" << std::chrono::duration_cast<std::chrono::milliseconds>(serial_dp_end - serial_dp_start).count() << " ms]\n";
+                // auto serial_dp_end = Clock::now();
+                // std::cout << "Serial DP Compute Time:  [" << std::chrono::duration_cast<std::chrono::milliseconds>(serial_dp_end - serial_dp_start).count() << " ms]\n";
                 
-                auto vector_dp_start = Clock::now();
+               // auto vector_dp_start = Clock::now();
 
                 Eigen::ArrayXXd S_CORR = - tensile_k * POLY_6.pow(tensile_n) / tensile_stability_denom;
-                Eigen::ArrayXXd SPIKY_DP = DISTANCE_WITHIN_KERNEL_MASK * (spiky_prefactor * (kernel_h_matrix - DISTANCE_MATRIX).square());
 
                 Eigen::ArrayXXd OUTER_SUM_LAMBDAS = LAMBDA_VECTORIZED.rowwise().replicate(LAMBDA_VECTORIZED.size()) + LAMBDA_VECTORIZED.transpose().colwise().replicate(LAMBDA_VECTORIZED.size());
                 Eigen::ArrayXXd WEIGHT_FACTOR;
-                WEIGHT_FACTOR = (DISTANCE_MATRIX < 0.00001).select(ZEROS_BLOCK, (OUTER_SUM_LAMBDAS + S_CORR) * (-SPIKY_DP / DISTANCE_MATRIX));
+                WEIGHT_FACTOR = (DISTANCE_MATRIX < 0.00001).select(ZEROS_BLOCK, (OUTER_SUM_LAMBDAS + S_CORR) * (- SPIKY_MATRIX_SHARED / DISTANCE_MATRIX));
                 WEIGHT_FACTOR *= (inverse_rho * NEIGHBOURS_MATRIX);
 
                 Eigen::ArrayXd X_NEW_X_COORD = x_new.col(0);
                 Eigen::ArrayXd X_NEW_Y_COORD = x_new.col(1);
                 Eigen::ArrayXd X_NEW_Z_COORD = x_new.col(2);
 
+                
                 Eigen::ArrayXXd OUTER_SUB_X_NEW_X_COORD = X_NEW_X_COORD.rowwise().replicate(X_NEW_X_COORD.size()) - X_NEW_X_COORD.transpose().colwise().replicate(X_NEW_X_COORD.size());
                 Eigen::ArrayXXd OUTER_SUB_X_NEW_Y_COORD = X_NEW_Y_COORD.rowwise().replicate(X_NEW_Y_COORD.size()) - X_NEW_Y_COORD.transpose().colwise().replicate(X_NEW_Y_COORD.size());
                 Eigen::ArrayXXd OUTER_SUB_X_NEW_Z_COORD = X_NEW_Z_COORD.rowwise().replicate(X_NEW_Z_COORD.size()) - X_NEW_Z_COORD.transpose().colwise().replicate(X_NEW_Z_COORD.size());
@@ -330,10 +335,11 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
                 Eigen::ArrayXXd DP_VECTORIZED = Eigen::ArrayXXd::Constant(num_particles, 3, 0.);
                 DP_VECTORIZED << DP_X, DP_Y, DP_Z;
-                std::cout << "\t\tdP Diff: " << (DP_VECTORIZED.matrix() - dP).norm() << std::endl;
+                //std::cout << "\t\tdP Diff: " << (DP_VECTORIZED.matrix() - dP).norm() << std::endl;
+                
 
-                auto vector_dp_end = Clock::now();
-                std::cout << "Vector DP Compute Time: [" << std::chrono::duration_cast<std::chrono::milliseconds>(vector_dp_end - vector_dp_start).count() << " ms]\n";
+                //auto vector_dp_end = Clock::now();
+                //std::cout << "Vector DP Compute Time: [" << std::chrono::duration_cast<std::chrono::milliseconds>(vector_dp_end - vector_dp_start).count() << " ms]\n";
                 
 
                 dP = DP_VECTORIZED;
@@ -344,11 +350,10 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
 
                 // --------------------- COLLISION DETECTION ----------------
-
+                x_new += 0.005 * dP;
 		// Collision Detection with boundary box and solid
                 for(int p_i = 0; p_i < num_particles; p_i++){
-			x_new.row(p_i) += 0.005 * dP.row(p_i); // TODO CALIBRATE SIMULATION
-                        
+
 			//Collision Detect correct p.x_new (naive)
                         for(int axis = 0; axis < 3; axis++){
                                 if (x_new.row(p_i)[axis] < lower_bound){ 
@@ -365,7 +370,10 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
 
                 auto t5 = Clock::now();
+               // std::cout << "Seralized Collision Detection Compute Time: [" << std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t4).count() << " ms]\n";
                 if (DEBUG) std::cout << "Collision Detection [" << std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t4).count() << " s]\n";
+
+              //  std::cout << "\n\n";
 	}
 
 	//Update Velocity
