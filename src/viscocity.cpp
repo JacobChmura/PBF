@@ -1,6 +1,7 @@
 #include <viscocity.h>
 #include <kernel.h>
 
+#include <iostream>
 void apply_viscocity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours, Eigen::MatrixXd &v, Eigen::MatrixXd &v_new, double viscocity_c, double kernel_h){
         int num_particles = x_new.rows();
 
@@ -12,5 +13,6 @@ void apply_viscocity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector
         }
 
         v = v_new;
+
 
 }

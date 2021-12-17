@@ -10,7 +10,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 1000;
+int num_particles = 2000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -64,8 +64,8 @@ Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
 Eigen::Vector3d mouse_pos;
 bool add_user_force;
 bool user_force_mode;
-bool use_viscocity;
-bool use_vorticity;
+bool use_viscocity = true;
+bool use_vorticity = true;
 
 void simulate(){
         int flag;
