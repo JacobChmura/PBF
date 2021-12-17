@@ -13,7 +13,7 @@ Position Based Fluid Simulation
 * ~~Viscocity / Vorticity working~~
 * ~~Optimize~~
 * ~~Better command line args~~
-* Density plot
+* ~~Density plot~~
 * Save frames
 * Aesthetics
 * Clean up and Document

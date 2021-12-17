@@ -10,14 +10,14 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 10000.0;
-int num_particles = 500;
+int num_particles = 100;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
-int JACOBI_ITERATIONS = 2;
+int JACOBI_ITERATIONS = 3;
 
 // Constraint Force Mixing Relaxation
 double CFM_EPSILON = 60.0;
@@ -71,8 +71,9 @@ void simulate(){
         int flag;
 	while(simulating){
 		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
-                //flag = getchar(); 
+                Visualize::add_energy(fluid.t, fluid.avg_density, fluid.max_density);
         }
+        
 }
 
 bool draw(igl::opengl::glfw::Viewer &viewer) {
@@ -197,9 +198,27 @@ int main(int argc, char **argv) {
         Visualize::viewer().callback_mouse_down = &mouse_down;
         Visualize::viewer().callback_mouse_up = &mouse_up;
 
-	Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
-	Visualize::viewer().launch_rendering(true);
-	simulating = false;
-	Visualize::viewer().launch_shut();
+        // Density Chart
+        Visualize::viewer_menu().callback_draw_custom_window = [&]()
+        {
+        // Define next window position + size
+        ImGui::SetNextWindowPos(ImVec2(180.f * Visualize::viewer_menu().menu_scaling(), 0), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(100, 10), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Density Plot", nullptr, ImGuiWindowFlags_NoSavedSettings);
+
+        ImVec2 min = ImGui::GetWindowContentRegionMin();
+        ImVec2 max = ImGui::GetWindowContentRegionMax();
+        max.x = ( max.x - min.x ) / 2;
+        max.y -= min.y + ImGui::GetTextLineHeightWithSpacing() * 3;
+
+        Visualize::plot_energy("Average Density", 1, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_PlotLines));
+        Visualize::plot_energy("Max Density", 2, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_HeaderActive));
+
+        ImGui::End();
+        };
+
+        Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
+        Visualize::viewer().launch_rendering(true);
+
 }
 

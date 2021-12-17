@@ -157,11 +157,11 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                         for(int axis = 0; axis < 3; axis++){
                                 if (x_new.row(p_i)[axis] < lower_bound){ 
                                         x_new.row(p_i)[axis] = lower_bound;
-                                        if (v(p_i, axis) < 0) v(p_i, axis) *= -1;
+                                        if (v(p_i, axis) < 0) v(p_i, axis) *= -5;
                                 }
                                 if (x_new.row(p_i)[axis] > upper_bound){ 
                                         x_new.row(p_i)[axis] = upper_bound;
-                                        if (v(p_i, axis) > 0) v(p_i, axis) *= -1;
+                                        if (v(p_i, axis) > 0) v(p_i, axis) *= -5;
                                 }
                         }
                 }
@@ -194,6 +194,10 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
         auto t9 = Clock::now();
         if (DEBUG) std::cout << "Simulation Step Total Time [" << std::chrono::duration_cast<std::chrono::milliseconds>(t9 - t0).count() << " ms]\n----------------------------------------\n";
+
+        // Update Density results for plotting
+        avg_density = density.sum() / density.size();
+        max_density = density.maxCoeff();
 
         // Debugging using colors for now.
         colors.row(0) << 1, 0, 0; // track particle 0 in red

@@ -57,6 +57,10 @@ public:
 	double lower_bound;
 	double upper_bound;
 
+	// For Density plot
+	double avg_density = 0;
+	double max_density = 0;
+
 	// Temp variables
 	Eigen::Vector3d ker_res;
         Eigen::Vector3d c_grad_temp;
