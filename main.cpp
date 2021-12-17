@@ -31,10 +31,10 @@ double TENSILE_delta_q = 0.2 * KERNEL_h;
 int TENSILE_n = 4;
 
 // Visocity Parameters
-double VISCOCITY_c = 0.001;
+double VISCOCITY_c = 0.0001;
 
 // Vorticity Parameters
-double VORTICITY_EPSILON = 0.001;
+double VORTICITY_EPSILON = 0.0001;
 
 // Simulation Parameters
 double dt = 0.001;
