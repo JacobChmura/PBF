@@ -17,7 +17,7 @@ double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
-int JACOBI_ITERATIONS = 3;
+int JACOBI_ITERATIONS = 2;
 
 // Constraint Force Mixing Relaxation
 double CFM_EPSILON = 60.0;

@@ -11,6 +11,10 @@ Position Based Fluid Simulation
 * ~~UI Toggles~~
 * ~~Apply External Forces with mouse~~
 * ~~Viscocity / Vorticity working~~
-* Optimize
+* ~~Optimize~~
+* Better command line args
+* Density plot
+* Save frames
+* Aesthetics
+* Clean up and Document
 * GPU
-* Aesthetics / Surfacing?
