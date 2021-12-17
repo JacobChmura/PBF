@@ -8,7 +8,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 0
+#define DEBUG 1
 
 Fluid::Fluid(double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 

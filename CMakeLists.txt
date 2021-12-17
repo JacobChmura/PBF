@@ -10,6 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 option(LIBIGL_WITH_OPENGL               "Use OpenGL"            ON)
 option(LIBIGL_WITH_OPENGL_GLFW          "Use GLFW"              ON)
 option(LIBIGL_WITH_OPENGL_GLFW_IMGUI    "Use ImGui"             ON)
+option(LIBIGL_WITH_PNG               	"Use PNG"               ON)
 
 find_package(LIBIGL REQUIRED QUIET)
 
@@ -26,4 +27,4 @@ file(GLOB CPP_SHARED_FILES ${PROJECT_SOURCE_DIR}/shared/src/*.cpp)
 
 #build executable 
 add_executable(${PROJECT_NAME} main.cpp ${H_FILES} ${H_SHARED_FILES} ${CPP_FILES} ${CPP_SHARED_FILES})
-target_link_libraries(${PROJECT_NAME} igl::core igl::opengl igl::opengl_glfw igl::opengl_glfw_imgui)
+target_link_libraries(${PROJECT_NAME} igl::core igl::opengl igl::opengl_glfw igl::opengl_glfw_imgui igl::png)

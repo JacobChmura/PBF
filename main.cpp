@@ -7,6 +7,9 @@
 #include <map>
 #include <string>
 
+#include <igl/png/writePNG.h>
+
+
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 10000.0;
@@ -67,18 +70,37 @@ bool user_force_mode;
 bool use_viscocity = true;
 bool use_vorticity = true;
 
+
+int capture_idx = 0;
+bool capture_frame;
+
 void simulate(){
         int flag;
 	while(simulating){
 		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
                 Visualize::add_energy(fluid.t, fluid.avg_density, fluid.max_density);
-        }
-        
+                capture_frame = true;               
+        }    
 }
+
+
 
 bool draw(igl::opengl::glfw::Viewer &viewer) {
     //update vertex positions using simulation
     Visualize::update_vertex_positions(fluid_state, colors);
+
+    if (capture_frame){
+        const int width  = viewer.core().viewport(2);
+        const int height = viewer.core().viewport(3);
+
+        std::unique_ptr<GLubyte[]> pixels(new GLubyte[width * height * 4]);
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.get());
+
+        std::string path = "../data/" + std::to_string(capture_idx++) + ".png";
+        igl::stbi_write_png(path.c_str(), width, height, 4, pixels.get() + width * (height - 1) * 4, -width * 4);
+
+        capture_frame = false;
+    }
     return false;
 }
 
@@ -173,6 +195,7 @@ int main(int argc, char **argv) {
 
         }
 
+  
 
         colors = Eigen::MatrixXd::Zero(num_particles, 3);
         for (int i = 0; i < num_particles; i++){
@@ -217,8 +240,11 @@ int main(int argc, char **argv) {
         ImGui::End();
         };
 
+   
+
         Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
         Visualize::viewer().launch_rendering(true);
+
 
 }
 
