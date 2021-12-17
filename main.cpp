@@ -9,7 +9,7 @@
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
-double RHO = 6000.0;
+double RHO = 10000.0;
 int num_particles = 2000;
 
 // External Force Parameters
@@ -17,10 +17,10 @@ double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
-int JACOBI_ITERATIONS = 1;
+int JACOBI_ITERATIONS = 3;
 
 // Constraint Force Mixing Relaxation
-double CFM_EPSILON = 600.0;
+double CFM_EPSILON = 60.0;
 
 // Kernel Parameters
 double KERNEL_h = 0.1;
@@ -119,7 +119,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 std::thread simulation_thread(simulate);
                 simulation_thread.detach();
         }
-        else if (key == '4'){ // toggle user force mode
+        else if (key == 'F'){ // toggle user force mode
                 user_force_mode = !user_force_mode;
                 if(user_force_mode){
                         std::cout << "User Force Mode Enabled.\n";
@@ -128,7 +128,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         std::cout << "User Force Mode Disabled.\n";
                 }
         }
-        else if (key == '5') { // toggle vorticity confinement
+        else if (key == 'V') { // toggle vorticity confinement
                 use_vorticity = !use_vorticity;
                 if(use_vorticity){
                         std::cout << "Vorticity Enabled.\n";
@@ -137,7 +137,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         std::cout << "Vorticity Disabled.\n";
                 }
         }
-        else if (key == '6') { // toggle XSPH viscocity
+        else if (key == 'X') { // toggle XSPH viscocity
                 use_viscocity = !use_viscocity;
                 if(use_viscocity){
                         std::cout << "Viscocity Enabled.\n";

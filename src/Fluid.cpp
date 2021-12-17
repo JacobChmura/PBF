@@ -8,7 +8,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 1
+#define DEBUG 0
 
 Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -73,7 +73,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 
 	// Apply External forces
         v.col(1) -= particle_mass * gravity_f;
-        
+                   
         // Apply User Foces if applicable
         if (add_user_force) {
                 Eigen::MatrixXd test = (-fluid_state).rowwise() + mouse_pos.transpose();
@@ -128,6 +128,8 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                 
                 auto t3 = Clock::now();
                 if (DEBUG) std::cout << "Computed Constraints [" << std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count() << " ms]\n";
+
+                //std::cout << "Density (jacobi iteration " << i << ") : " << density.sum() / density.size() << std::endl;
 
 		// //Compute dP
                 dP.setZero();
