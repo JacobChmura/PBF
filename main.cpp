@@ -10,7 +10,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 6000.0;
-int num_particles = 2000;
+int num_particles = 1000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;

@@ -59,7 +59,8 @@ void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_
 
                                                 // Add each one (including yourself) as a neighbour
                                                 for (auto particle_idx: cells[hashed_coord]){
-                                                        neighbours[i].push_back(particle_idx);
+                                                        if (! std::count(neighbours[i].begin(), neighbours[i].end(), particle_idx)) neighbours[i].push_back(particle_idx);
+                                                        
                                                 }
                                         }
                                 }
