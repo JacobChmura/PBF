@@ -8,7 +8,6 @@ namespace Visualize {
     igl::opengl::glfw::imgui::ImGuiMenu menu;
     
     Eigen::VectorXd const *g_fluid_state;
-    Eigen::VectorXd const *g_velocity;
 
     Eigen::Vector3d g_mouse_win;
 
@@ -18,7 +17,7 @@ igl::opengl::glfw::Viewer & Visualize::viewer() { return g_viewer; }
 
 
 // setup
-void Visualize::setup(const Eigen::MatrixXd &fluid_state, const Eigen::MatrixXd &velocity){
+void Visualize::setup(const Eigen::MatrixXd &fluid_state){
 	g_viewer.core().background_color.setConstant(1.0);
 	g_viewer.core().is_animating = true;
 	g_viewer.data().point_size = 5.;

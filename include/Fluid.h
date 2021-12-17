@@ -26,8 +26,8 @@ public:
 
 	double particle_mass; // Mass of each particle
 	double rho; // Rest density
-	//double gravity_f; // Force of gravity on the system
-//	double user_f; // Force of user applied force on the system
+	double gravity_f_; // Force of gravity on the system
+	double user_f_; // Force of user applied force on the system
 
 	// Jacobi Parameters
 	int jacobi_iterations;
@@ -94,7 +94,7 @@ public:
 
 
         */
-	Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
+	Fluid(double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
 			double viscocity_c, double vorticity_epsilon, double lower_bound, double upper_bound, double dt);
 

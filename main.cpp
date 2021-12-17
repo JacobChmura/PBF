@@ -10,7 +10,7 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 10000.0;
-int num_particles = 2000;
+int num_particles = 500;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -51,13 +51,13 @@ Eigen::MatrixXd V_box(8,3);
 Eigen::MatrixXi E_box(12,2);
 
 // Global state
-Fluid fluid(num_particles, PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
+Fluid fluid(PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
 			CFM_EPSILON, KERNEL_h, TENSILE_k, TENSILE_delta_q, TENSILE_n, 
 			VISCOCITY_c, VORTICITY_EPSILON, LOWER_BOUND, UPPER_BOUND, dt);
 
-Eigen::MatrixXd fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
-Eigen::MatrixXd colors = Eigen::MatrixXd::Zero(num_particles, 3);
-Eigen::MatrixXd velocity = Eigen::MatrixXd::Zero(num_particles, 3);
+Eigen::MatrixXd fluid_state;
+Eigen::MatrixXd colors;
+Eigen::MatrixXd velocity;
 
 
 // test mouse
@@ -70,7 +70,6 @@ bool use_vorticity = true;
 void simulate(){
         int flag;
 	while(simulating){
-		//std::cout << "step.\n";
 		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
                 //flag = getchar(); 
         }
@@ -111,8 +110,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
 
                 sleep(1); // not sure about this
                 std::cout << "Restarting simulation " << SIMULATION_MODE[key-'0'] << std::endl;
-                fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
-                setup(key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[key-'0']);
+                setup(num_particles, key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[key-'0']);
                 fluid.init_state(fluid_state); 
 
                 simulating = true;
@@ -154,18 +152,34 @@ int main(int argc, char **argv) {
         // Parse command line arguments
         if (argc > 1){
                 if (argc > 2){
-                        std::cerr << "Usage: " << argv[0] << " SIMULATION SCENE" << std::endl;
+                        if (argc > 3){
+                                std::cerr << "Usage: " << argv[0] << " <Simulation Scene> <Number of Particles> " << std::endl;
+                                return 1;
+                        }
+                        num_particles = std::stoi(argv[2]);
+
+                        if ((num_particles < 10) || (num_particles > 10000)){
+                                std::cerr << "Expected Number of Particles in range (10, 10000) but got: " << num_particles << std::endl;
+                                return 1;
+                        }
+                }
+                SIMULATION_SCENE = std::stoi(argv[1]);
+                if ((SIMULATION_SCENE < 0) || (SIMULATION_SCENE > 3)){
+                        std::cerr << "Expected Simulation Scene in range [0, 3] but got : " << SIMULATION_SCENE << std::endl;
                         return 1;
                 }
 
-                SIMULATION_SCENE = std::stoi(argv[1]);
+
         }
+
+
+        colors = Eigen::MatrixXd::Zero(num_particles, 3);
         for (int i = 0; i < num_particles; i++){
                 colors(i, 2) = 1;
         }
 
 	// Initialize setup
-        setup(SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[SIMULATION_SCENE]);
+        setup(num_particles, SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[SIMULATION_SCENE]);
 	fluid.init_state(fluid_state); 
         
         // Launch new thread for simulation
@@ -173,7 +187,7 @@ int main(int argc, char **argv) {
         simulation_thread.detach();
 
 	// Visualization Schema
-        Visualize::setup(fluid_state, velocity);
+        Visualize::setup(fluid_state);
 	Visualize::add_object_to_scene(V_box, E_box, Eigen::RowVector3d(1, 0, 0));
 
 	Visualize::viewer().callback_post_draw = &draw;

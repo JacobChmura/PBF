@@ -10,11 +10,11 @@ typedef std::chrono::high_resolution_clock Clock;
 
 #define DEBUG 0
 
-Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
+Fluid::Fluid(double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
 			double viscocity_c, double vorticity_epsilon, double lower_bound, double upper_bound, double dt){
 
-        this->num_particles = num_particles;
+        
 	this->particle_mass = particle_mass;
 	this->rho = rho;
 
@@ -38,6 +38,16 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
 
         this->grid = SpatialHashGrid(lower_bound, upper_bound, kernel_h);
 
+        this->tensile_stability_denom = pow(kernel_poly6(tensile_delta_q, kernel_h), tensile_n);
+
+        this->gravity_f_ = gravity_f;
+        this->user_f_ = user_f;
+
+}	
+
+void Fluid::init_state(Eigen::MatrixXd &fluid_state){
+        int num_particles = fluid_state.rows();
+        this->num_particles = num_particles;
         this->x_new.resize(num_particles, 3);
         this->v.resize(num_particles, 3);
         this->v_new.resize(num_particles, 3);
@@ -53,17 +63,12 @@ Fluid::Fluid(int num_particles, double particle_mass, double rho, double gravity
         this->lambda.resize(num_particles);
         this->c_grad_norm.resize(num_particles);
 
-        this->gravity_f = Eigen::VectorXd::Constant(num_particles, gravity_f);
-        this->user_f = Eigen::VectorXd::Constant(num_particles, user_f);
+        this->gravity_f = Eigen::VectorXd::Constant(num_particles, this->gravity_f_);
+        this->user_f = Eigen::VectorXd::Constant(num_particles, this->user_f_);
 
         std::vector<std::vector<int>> neighbours_init(num_particles);
         this->neighbours = neighbours_init;
 
-        this->tensile_stability_denom = pow(kernel_poly6(tensile_delta_q, kernel_h), tensile_n);
-
-}	
-
-void Fluid::init_state(Eigen::MatrixXd &fluid_state){
         v.setZero();
         grid.update(fluid_state);
 }

@@ -17,7 +17,7 @@ namespace Visualize {
 	igl::opengl::glfw::Viewer & viewer();
 
 	
-    void setup(const Eigen::MatrixXd &fluid_state, const Eigen::MatrixXd &velocity);
+    void setup(const Eigen::MatrixXd &fluid_state);
 
     void add_object_to_scene(const Eigen::MatrixXd &V, const Eigen::MatrixXi &E, Eigen::RowVector3d color);
     

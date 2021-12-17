@@ -12,7 +12,7 @@ Position Based Fluid Simulation
 * ~~Apply External Forces with mouse~~
 * ~~Viscocity / Vorticity working~~
 * ~~Optimize~~
-* Better command line args
+* ~~Better command line args~~
 * Density plot
 * Save frames
 * Aesthetics
