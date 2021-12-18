@@ -64,8 +64,8 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
         // Write into fluid_state
         switch(simulation_scene){
                 case 0: { // dam fall
-                        double HI = 0.25;
-                        double LO = -0.25;
+                        double HI = 0.5;
+                        double LO = -0.5;
                         double range = HI - LO;       
                         
                         fluid_state = (fluid_state + Eigen::MatrixXd::Constant(fluid_state.rows(), fluid_state.cols(), 1.))*range/2.;
@@ -80,12 +80,12 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
                         Eigen::MatrixXd block_two = Eigen::MatrixXd::Random(num_particles_block_two, fluid_state.cols()); 
 
-                        double HI_block_one = 0.125;
-                        double LO_block_one = -0.125;
+                        double HI_block_one = 0.2;
+                        double LO_block_one = -0.75;
                         double range_block_one = HI_block_one - LO_block_one;       
                         
-                        double HI_block_two = 0.4;
-                        double LO_block_two = 0.15;
+                        double HI_block_two = 0.75;
+                        double LO_block_two = -0.2;
                         double range_block_two = HI_block_one - LO_block_one;       
 
                         block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), 1.))*range_block_one/2.;
@@ -103,18 +103,18 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         int num_particles_block_one = int(num_particles / 4);
                         int num_particles_floor = fluid_state.rows() - num_particles_block_one;
                        
-                        double HI_block_one = 0.125;
-                        double LO_block_one = -0.125;
+                        double HI_block_one = 0.5;
+                        double LO_block_one = -0.5;
                         double range_block_one = HI_block_one - LO_block_one;       
 
-                        double HI_surface_x = 0.5;
-                        double LO_surface_x = -0.5;
+                        double HI_surface_x = 1;
+                        double LO_surface_x = -1;
                         double range_surface_x = HI_surface_x - LO_surface_x;
                         double HI_surface_y = -0.95;
                         double LO_surface_y = -1;
                         double range_surface_y = HI_surface_y - LO_surface_y;
-                        double HI_surface_z = 0.5;
-                        double LO_surface_z = -0.5;
+                        double HI_surface_z = 1;
+                        double LO_surface_z = -1;
                         double range_surface_z = HI_surface_z - LO_surface_y;
 
 
@@ -149,12 +149,12 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
                         Eigen::MatrixXd block_two = Eigen::MatrixXd::Random(num_particles_block_two, fluid_state.cols()); 
 
-                        double HI_block_one = 0.125;
-                        double LO_block_one = -0.125;
+                        double HI_block_one = 0.2;
+                        double LO_block_one = -0.75;
                         double range_block_one = HI_block_one - LO_block_one;       
                         
-                        double HI_block_two = 0.4;
-                        double LO_block_two = 0.15;
+                        double HI_block_two = 0.75;
+                        double LO_block_two = -0.2;
                         double range_block_two = HI_block_one - LO_block_one;       
 
                         block_one = (block_one + Eigen::MatrixXd::Constant(block_one.rows(), block_one.cols(), 1.))*range_block_one/2.;
@@ -163,14 +163,14 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), 1.))*range_block_two/2.;
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), LO_block_two));
 
-                        double HI_surface_x = 0.5;
-                        double LO_surface_x = -0.5;
+                        double HI_surface_x = 1;
+                        double LO_surface_x = -1;
                         double range_surface_x = HI_surface_x - LO_surface_x;
                         double HI_surface_y = -0.95;
                         double LO_surface_y = -1;
                         double range_surface_y = HI_surface_y - LO_surface_y;
-                        double HI_surface_z = 0.5;
-                        double LO_surface_z = -0.5;
+                        double HI_surface_z = 1;
+                        double LO_surface_z = -1;
                         double range_surface_z = HI_surface_z - LO_surface_y;
 
                         Eigen::VectorXd surface_x = Eigen::VectorXd::Random(num_particles_floor);

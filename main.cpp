@@ -9,18 +9,30 @@
 
 #include <igl/png/writePNG.h>
 
+/* 2000 Particles good params
+RHO = 100000
+num_particles = 2000
+jacobi_iteraions = 4
+cfm_epsilon = 60
+tensile_k = 0.1
+tensile_delta_1 = 0.2*kernel
+tensile_n = 4
+viscocicity_c = 0.0001
+vorticity_epsilon = 0.0001
+*/
+
 
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
-double RHO = 10000.0;
-int num_particles = 5000;
+double RHO = 20000.0;
+int num_particles = 10000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
-int JACOBI_ITERATIONS = 4;
+int JACOBI_ITERATIONS = 3;
 
 // Constraint Force Mixing Relaxation
 double CFM_EPSILON = 60.0;

@@ -75,7 +75,7 @@ void Visualize::setup(const Eigen::MatrixXd &fluid_state){
 
 	g_viewer.core().background_color.setConstant(0.95);
 	g_viewer.core().is_animating = true;
-	g_viewer.data().point_size = 4.;
+	g_viewer.data().point_size = 3.;
 }	
 
 // add_object to scene

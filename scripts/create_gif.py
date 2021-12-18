@@ -3,9 +3,9 @@ import glob
 from PIL import Image
 
 if __name__ == "__main__":
-    if sys.argv > 1:
-        fp_in = f"../data/{argv[1]}/frames/*.png"
-        fp_out = f"../data/{argv[1]}/gifs/{argv[1]}.gif"
+    if len(sys.argv) > 1:
+        fp_in = f"../data/{sys.argv[1]}/frames/*.png"
+        fp_out = f"../data/{sys.argv[1]}/gifs/{sys.argv[1]}.gif"
     else:
         fp_in = "../data/debug/frames/*.png"
         fp_out = "../data/debug/gifs/image.gif"

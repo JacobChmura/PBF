@@ -157,11 +157,11 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                         for(int axis = 0; axis < 3; axis++){
                                 if (x_new.row(p_i)[axis] < lower_bound){ 
                                         x_new.row(p_i)[axis] = lower_bound;
-                                        if (v(p_i, axis) < 0) v(p_i, axis) *= -5;
+                                        if (v(p_i, axis) < 0) v(p_i, axis) *= -3;
                                 }
                                 if (x_new.row(p_i)[axis] > upper_bound){ 
                                         x_new.row(p_i)[axis] = upper_bound;
-                                        if (v(p_i, axis) > 0) v(p_i, axis) *= -5;
+                                        if (v(p_i, axis) > 0) v(p_i, axis) *= -3;
                                 }
                         }
                 }
