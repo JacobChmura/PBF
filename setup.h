@@ -19,7 +19,7 @@ Input:
                         1 = dam break: cube drops into surface of water
                         2 = double dam fall: two cubes drop into nothing
                         3 = double dam fall: two cubes drop into surface of water
-        
+                        4 = floor: all particles distributed on the floor
         double lower_bound, upper_bound: contain the bounding box extrema world-space coordinates.
 
 
@@ -32,7 +32,7 @@ Modifies:
 void setup(int num_particles, int simulation_scene, double lower_bound, double upper_bound, 
                 Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &V_box, Eigen::MatrixXi &E_box, std::string simulation_scene_str){
 
-        std::cout << "\n=========== POSITION BASED FLUIDS:  " << simulation_scene_str << " =============\n\tPause Simulation\t\t [SpaceBar]\n\tRestart Dam Fall\t\t [0]\n\tRestart Dam Break\t\t [1]\n\tRestart Double Dam Fall\t\t [2]\n\tRestart Double Dam Break\t [3]\n\n\tToggle User Force Mode\t\t [f]\n\tToggle Vorticity Confinement\t [v]\n\tToggle XPSH Viscocity\t\t [x]\n========================================================\n";
+        std::cout << "\n=========== POSITION BASED FLUIDS:  " << simulation_scene_str << " =============\n\tPause Simulation\t\t [SpaceBar]\n\tRestart Dam Fall\t\t [0]\n\tRestart Dam Break\t\t [1]\n\tRestart Double Dam Fall\t\t [2]\n\tRestart Double Dam Break\t [3]\n\tRestart Floor\t\t\t [4]\n\n\tToggle User Force Mode\t\t [f]\n\tToggle Vorticity Confinement\t [v]\n\tToggle XPSH Viscocity\t\t [x]\n========================================================\n";
         
         fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
 
@@ -190,6 +190,33 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         fluid_state.block(num_particles_block_one + num_particles_block_two, 1, num_particles_floor, 1) = surface_y;
                         fluid_state.block(num_particles_block_one + num_particles_block_two, 2, num_particles_floor, 1) = surface_z;
                         break;
+                }
+                case 4: { // floor
+                        Eigen::VectorXd surface_x = Eigen::VectorXd::Random(num_particles);
+                        Eigen::VectorXd surface_y = Eigen::VectorXd::Random(num_particles);
+                        Eigen::VectorXd surface_z = Eigen::VectorXd::Random(num_particles);
+
+                        double HI_surface_x = 1;
+                        double LO_surface_x = -1;
+                        double range_surface_x = HI_surface_x - LO_surface_x;
+                        double HI_surface_y = -0.95;
+                        double LO_surface_y = -1;
+                        double range_surface_y = HI_surface_y - LO_surface_y;
+                        double HI_surface_z = 1;
+                        double LO_surface_z = -1;
+                        double range_surface_z = HI_surface_z - LO_surface_y;
+                        surface_x = (surface_x + Eigen::VectorXd::Constant(num_particles, 1.))*range_surface_x/2;
+                        surface_x = (surface_x + Eigen::VectorXd::Constant(num_particles, LO_surface_x));
+                        surface_y = (surface_y + Eigen::VectorXd::Constant(num_particles, 1.))*range_surface_y/2;
+                        surface_y = (surface_y + Eigen::VectorXd::Constant(num_particles, LO_surface_y));
+                        surface_z = (surface_z + Eigen::VectorXd::Constant(num_particles, 1.))*range_surface_z/2;
+                        surface_z = (surface_z + Eigen::VectorXd::Constant(num_particles, LO_surface_z));
+
+                        fluid_state.block(0, 0, num_particles, 1) = surface_x;
+                        fluid_state.block(0, 1, num_particles, 1) = surface_y;
+                        fluid_state.block(0, 2, num_particles, 1) = surface_z;
+                        break;
+
                 }
                 default: {
                         std::cout << "Random Simulation State.\n";

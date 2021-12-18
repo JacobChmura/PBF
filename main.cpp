@@ -25,7 +25,7 @@ vorticity_epsilon = 0.0001
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 20000.0;
-int num_particles = 10000;
+int num_particles = 5000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -55,7 +55,7 @@ double VORTICITY_EPSILON = 0.0001;
 double dt = 0.0001;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
-std::map<int, std::string> SIMULATION_MODE = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}};
+std::map<int, std::string> SIMULATION_MODE = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}, {4, "Floor"}};
 
 // Bounding Box Extrema
 double LOWER_BOUND = -1;
@@ -145,7 +145,7 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                         simulation_thread.detach();
                 }
         }
-        else if (key == '0' || key == '1' || key == '2' || key == '3') { // restart a simulation
+        else if (key == '0' || key == '1' || key == '2' || key == '3' || key == '4') { // restart a simulation
                 simulating = false;
 
                 sleep(1); // not sure about this
@@ -206,8 +206,8 @@ int main(int argc, char **argv) {
                         }
                 }
                 SIMULATION_SCENE = std::stoi(argv[1]);
-                if ((SIMULATION_SCENE < 0) || (SIMULATION_SCENE > 3)){
-                        std::cerr << "Expected Simulation Scene in range [0, 3] but got : " << SIMULATION_SCENE << std::endl;
+                if ((SIMULATION_SCENE < 0) || (SIMULATION_SCENE > 4)){
+                        std::cerr << "Expected Simulation Scene in range [0, 4] but got : " << SIMULATION_SCENE << std::endl;
                         return 1;
                 }
         }
