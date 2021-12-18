@@ -13,14 +13,14 @@
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 10000.0;
-int num_particles = 100;
+int num_particles = 5000;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
 double USER_F = 20.0;
 
 // Jacobi Parameters
-int JACOBI_ITERATIONS = 3;
+int JACOBI_ITERATIONS = 4;
 
 // Constraint Force Mixing Relaxation
 double CFM_EPSILON = 60.0;
@@ -40,7 +40,7 @@ double VISCOCITY_c = 0.0001;
 double VORTICITY_EPSILON = 0.0001;
 
 // Simulation Parameters
-double dt = 0.001;
+double dt = 0.0001;
 bool simulating = true; 
 int SIMULATION_SCENE = 0;
 std::map<int, std::string> SIMULATION_MODE = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}};
@@ -70,9 +70,12 @@ bool user_force_mode;
 bool use_viscocity = true;
 bool use_vorticity = true;
 
+// frame capture 
+#define CAPTURE 1
 
 int capture_idx = 0;
 bool capture_frame;
+std::string experiment_id = "debug";
 
 void simulate(){
         int flag;
@@ -89,17 +92,19 @@ bool draw(igl::opengl::glfw::Viewer &viewer) {
     //update vertex positions using simulation
     Visualize::update_vertex_positions(fluid_state, colors);
 
-    if (capture_frame){
-        const int width  = viewer.core().viewport(2);
-        const int height = viewer.core().viewport(3);
+    if (CAPTURE){
+            if (capture_frame){
+                const int width  = viewer.core().viewport(2);
+                const int height = viewer.core().viewport(3);
 
-        std::unique_ptr<GLubyte[]> pixels(new GLubyte[width * height * 4]);
-        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.get());
+                std::unique_ptr<GLubyte[]> pixels(new GLubyte[width * height * 4]);
+                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.get());
 
-        std::string path = "../data/" + std::to_string(capture_idx++) + ".png";
-        igl::stbi_write_png(path.c_str(), width, height, 4, pixels.get() + width * (height - 1) * 4, -width * 4);
+                std::string path = "../data/" + experiment_id + "/frames/" + std::to_string(capture_idx++) + ".png";
+                igl::stbi_write_png(path.c_str(), width, height, 4, pixels.get() + width * (height - 1) * 4, -width * 4);
 
-        capture_frame = false;
+                capture_frame = false;
+            }
     }
     return false;
 }
@@ -176,11 +181,13 @@ int main(int argc, char **argv) {
         if (argc > 1){
                 if (argc > 2){
                         if (argc > 3){
-                                std::cerr << "Usage: " << argv[0] << " <Simulation Scene> <Number of Particles> " << std::endl;
-                                return 1;
+                                if (argc > 4){
+                                        std::cerr << "Usage: " << argv[0] << " <Simulation Scene> <Number of Particles> <experiment name>" << std::endl;
+                                        return 1;    
+                                }
+                                experiment_id = argv[3];
                         }
                         num_particles = std::stoi(argv[2]);
-
                         if ((num_particles < 10) || (num_particles > 10000)){
                                 std::cerr << "Expected Number of Particles in range (10, 10000) but got: " << num_particles << std::endl;
                                 return 1;
@@ -191,8 +198,6 @@ int main(int argc, char **argv) {
                         std::cerr << "Expected Simulation Scene in range [0, 3] but got : " << SIMULATION_SCENE << std::endl;
                         return 1;
                 }
-
-
         }
 
   

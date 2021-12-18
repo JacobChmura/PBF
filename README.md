@@ -1,6 +1,11 @@
 # PBF
 Position Based Fluid Simulation
 
+# Dummy Example
+
+![](results/2k_waves.gif)
+
+
 ### TODO
 
 * ~~Setup Simulation Framework~~
@@ -14,7 +19,7 @@ Position Based Fluid Simulation
 * ~~Optimize~~
 * ~~Better command line args~~
 * ~~Density plot~~
-* Save frames
+* ~~Save frames~~
 * Aesthetics
 * Clean up and Document
 * GPU

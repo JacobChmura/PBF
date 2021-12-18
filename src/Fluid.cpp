@@ -8,7 +8,7 @@
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
 
-#define DEBUG 1
+#define DEBUG 0
 
 Fluid::Fluid(double particle_mass, double rho, double gravity_f, double user_f, int jacobi_iterations, 
 			double cfm_epsilon, double kernel_h, double tensile_k, double tensile_delta_q, int tensile_n, 
@@ -199,16 +199,16 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
         avg_density = density.sum() / density.size();
         max_density = density.maxCoeff();
 
-        // Debugging using colors for now.
-        colors.row(0) << 1, 0, 0; // track particle 0 in red
-        for (int i = 1; i < num_particles; i++){
-                colors.row(i) << 0, 0, 1; 
-        }
-        for (auto n_idx : neighbours[0]){
-                if (n_idx != 0){
-                        colors.row(n_idx) << 0, 1, 0; // track neighbours in green
-                }
-        }
+        // // Debugging using colors for now.
+        // colors.row(0) << 1, 0, 0; // track particle 0 in red
+        // for (int i = 1; i < num_particles; i++){
+        //         colors.row(i) << 0, 0, 1; 
+        // }
+        // for (auto n_idx : neighbours[0]){
+        //         if (n_idx != 0){
+        //                 colors.row(n_idx) << 0, 1, 0; // track neighbours in green
+        //         }
+        // }
 
 	t += dt;
 }
