@@ -1,10 +1,13 @@
-# PBF
-Position Based Fluid Simulation
-
-# Dummy Example
-
+# CSC417 Final Project: Position Based Fluids
 ![](results/2k_waves.gif)
 
+## Introduction
+
+### Project Layout
+
+### Compilation
+
+### Executation
 
 ### TODO
 
@@ -23,3 +26,7 @@ Position Based Fluid Simulation
 * ~~Clean up and Document~~
 * Aesthetics
 * GPU
+
+### References
+
+[Position Based Fluids https://mmacklin.com/pbf_sig_preprint.pdf] (https://mmacklin.com/pbf_sig_preprint.pdf)
