@@ -201,3 +201,13 @@ void Visualize::add_density(float t, float average_density, float max_density) {
 	tmp[2] = max_density;
 	g_density.push_back(tmp);
 }
+
+void Visualize::write_frame(std::string &path){
+	const int width  = g_viewer.core().viewport(2);
+    const int height = g_viewer.core().viewport(3);
+
+    std::unique_ptr<GLubyte[]> pixels(new GLubyte[width * height * 4]);
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.get());
+    
+    igl::stbi_write_png(path.c_str(), width, height, 4, pixels.get() + width * (height - 1) * 4, - width * 4);
+}

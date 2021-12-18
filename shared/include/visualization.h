@@ -6,9 +6,11 @@
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
 #include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
+#include <igl/png/writePNG.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include <string>
 #include <deque>
 #include <Eigen/Dense>
 
@@ -26,6 +28,8 @@ namespace Visualize {
 
     void add_density(float t, float average_density, float max_density);
     bool plot_density(const char *label, unsigned int type, ImVec2 T_bounds, ImVec2 V_bounds, ImU32 plot_col);
+
+    void write_frame(std::string &path);
 }
 
 

@@ -20,6 +20,6 @@ Position Based Fluid Simulation
 * ~~Better command line args~~
 * ~~Density plot~~
 * ~~Save frames~~
+* ~~Clean up and Document~~
 * Aesthetics
-* Clean up and Document
 * GPU

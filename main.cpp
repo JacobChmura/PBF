@@ -1,13 +1,15 @@
 #include <iostream>
-#include <thread>
-#include <visualization.h>
-#include <Fluid.h>
-#include "setup.h"
 #include <unistd.h>
+#include <thread>
+
 #include <map>
 #include <string>
 
-#include <igl/png/writePNG.h>
+#include <visualization.h>
+#include <Fluid.h>
+#include "setup.h"
+
+#define CAPTURE 0 // if you want to save frames
 
 /* 2000 Particles good params
 RHO = 100000
@@ -21,109 +23,90 @@ viscocicity_c = 0.0001
 vorticity_epsilon = 0.0001
 */
 
-
-// Particle Parameters
-double PARTICLE_MASS = 1.0;
-double RHO = 20000.0;
-int num_particles = 200;
-
-// External Force Parameters
-double GRAVITY_F = 9.8;
-double USER_F = 20.0;
-
-// Jacobi Parameters
-int JACOBI_ITERATIONS = 3;
-
-// Constraint Force Mixing Relaxation
-double CFM_EPSILON = 60.0;
-
-// Kernel Parameters
-double KERNEL_h = 0.1;
-
-// Tensile Stability Parameters
-double TENSILE_k = 0.1;
-double TENSILE_delta_q = 0.2 * KERNEL_h;
-int TENSILE_n = 4;
-
-// Visocity Parameters
-double VISCOCITY_c = 0.0001;
-
-// Vorticity Parameters
-double VORTICITY_EPSILON = 0.0001;
-
-// Simulation Parameters
+// ---------------- Constants ----------------
 double dt = 0.0001;
-bool simulating = true; 
-int SIMULATION_SCENE = 0;
-std::map<int, std::string> SIMULATION_MODE = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}, {4, "Floor"}};
+double particle_mass = 1.0;
+double kernel_h = 0.1;
 
-// Bounding Box Extrema
-double LOWER_BOUND = -1;
-double UPPER_BOUND = 1;
+// External forces
+double gravity_f = 9.8; 
+double user_f = 20.0; 
 
-// Bounding box vertices and edges 
+// Bounding Box
+double lower_bound = -1;
+double upper_bound = 1;
 Eigen::MatrixXd V_box(8,3);
 Eigen::MatrixXi E_box(12,2);
 
-// Global state
-Fluid fluid(PARTICLE_MASS, RHO, GRAVITY_F, USER_F, JACOBI_ITERATIONS, 
-			CFM_EPSILON, KERNEL_h, TENSILE_k, TENSILE_delta_q, TENSILE_n, 
-			VISCOCITY_c, VORTICITY_EPSILON, LOWER_BOUND, UPPER_BOUND, dt);
+// ---------------- Configurable -------------
+int num_particles = 200;
+int jacobi_iterations = 3;
+double rho = 20000.0; // rest density
+double cfm_epsilon = 60.0; // Constraint Force Mixing Relaxation
 
+// Tensile Stability 
+int tensile_n = 4;
+double tensile_k = 0.1;
+double tensile_delta_q = 0.2 * kernel_h;
+
+// Visocity / Vorticity 
+double viscocity_c = 0.0001;
+double vorticity_epsilon = 0.0001;
+
+
+// ----------- Simulation Parameters ------------
+bool simulating = true; 
+int simulation_scene = 0;
+std::map<int, std::string> simulation_modes = {{0, "Dam Fall"}, {1, "Dam Break"}, {2, "Double Dam Fall"}, {3, "Double Dam Break"}, {4, "Floor"}};
+
+
+
+// ----------- Global state -------------
+Fluid fluid(particle_mass, rho, gravity_f, user_f, jacobi_iterations, 
+			cfm_epsilon, kernel_h, tensile_k, tensile_delta_q, tensile_n, 
+			viscocity_c, vorticity_epsilon, lower_bound, upper_bound, dt);
 Eigen::MatrixXd fluid_state;
 Eigen::MatrixXd colors;
 Eigen::MatrixXd velocity;
 
-
-// test mouse
-Eigen::Vector3d mouse_pos;
+// ----------- Input / Output ------------
 bool add_user_force;
-bool user_force_mode;
+bool user_force_flag;
 bool use_viscocity = true;
 bool use_vorticity = true;
+Eigen::Vector3d mouse_pos;
 
-// frame capture 
-#define CAPTURE 1
-
-int capture_idx = 0;
-bool capture_frame;
+bool write_frame_flag;
+int frame_number = 0;
 std::string experiment_id = "debug";
 
+
+// ----------- Simulation Loop -----------
 void simulate(){
-        int flag;
-	while(simulating){
-		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
+        while(simulating){
+                fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
                 Visualize::add_density(fluid.t, fluid.avg_density, fluid.max_density);
-                capture_frame = true;               
+                write_frame_flag = true;               
         }    
 }
 
-
-
+// ----------- IGL Callbacks -------------
 bool draw(igl::opengl::glfw::Viewer &viewer) {
-    //update vertex positions using simulation
-    Visualize::update_vertex_positions(fluid_state, colors);
+        //update vertex positions using simulation
+        Visualize::update_vertex_positions(fluid_state, colors);
 
-    if (CAPTURE){
-            if (capture_frame){
-                const int width  = viewer.core().viewport(2);
-                const int height = viewer.core().viewport(3);
-
-                std::unique_ptr<GLubyte[]> pixels(new GLubyte[width * height * 4]);
-                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.get());
-
-                std::string path = "../data/" + experiment_id + "/frames/" + std::to_string(capture_idx++) + ".png";
-                igl::stbi_write_png(path.c_str(), width, height, 4, pixels.get() + width * (height - 1) * 4, -width * 4);
-
-                capture_frame = false;
-            }
-    }
-    return false;
+        // if we are intending to capture frames, and we have received an update from the fluid, use openGL to read all pixels
+        if (CAPTURE && write_frame_flag){
+                std::string path = "../data/" + experiment_id + "/frames/" + std::to_string(frame_number++) + ".png";
+                Visualize::write_frame(path);
+                write_frame_flag = false;
+        }
+        return false;
 }
 
 bool mouse_down(igl::opengl::glfw::Viewer &viewer, int x, int y){
         Visualize::get_mouse_down_pos(viewer, mouse_pos);
-        if (user_force_mode) add_user_force  = true;
+        if (user_force_flag) add_user_force  = true;
         return false;
 }
 
@@ -147,10 +130,9 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
         }
         else if (key == '0' || key == '1' || key == '2' || key == '3' || key == '4') { // restart a simulation
                 simulating = false;
-
-                sleep(1); // not sure about this
-                std::cout << "Restarting simulation " << SIMULATION_MODE[key-'0'] << std::endl;
-                setup(num_particles, key - '0', LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[key-'0']);
+                sleep(1);
+                std::cout << "Restarting simulation " << simulation_modes[key-'0'] << std::endl;
+                setup(num_particles, key - '0', lower_bound, upper_bound, fluid_state, V_box, E_box, colors, simulation_modes[key-'0']);
                 fluid.init_state(fluid_state); 
 
                 simulating = true;
@@ -158,8 +140,8 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
                 simulation_thread.detach();
         }
         else if (key == 'F'){ // toggle user force mode
-                user_force_mode = !user_force_mode;
-                if(user_force_mode){
+                user_force_flag = !user_force_flag;
+                if(user_force_flag){
                         std::cout << "User Force Mode Enabled.\n";
                 }
                 else{
@@ -187,40 +169,12 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
         return false;
 }
 
+
 int main(int argc, char **argv) {
-
-        // Parse command line arguments
-        if (argc > 1){
-                if (argc > 2){
-                        if (argc > 3){
-                                if (argc > 4){
-                                        std::cerr << "Usage: " << argv[0] << " <Simulation Scene> <Number of Particles> <experiment name>" << std::endl;
-                                        return 1;    
-                                }
-                                experiment_id = argv[3];
-                        }
-                        num_particles = std::stoi(argv[2]);
-                        if ((num_particles < 10) || (num_particles > 10000)){
-                                std::cerr << "Expected Number of Particles in range (10, 10000) but got: " << num_particles << std::endl;
-                                return 1;
-                        }
-                }
-                SIMULATION_SCENE = std::stoi(argv[1]);
-                if ((SIMULATION_SCENE < 0) || (SIMULATION_SCENE > 4)){
-                        std::cerr << "Expected Simulation Scene in range [0, 4] but got : " << SIMULATION_SCENE << std::endl;
-                        return 1;
-                }
-        }
-
-  
-
-        colors = Eigen::MatrixXd::Zero(num_particles, 3);
-        for (int i = 0; i < num_particles; i++){
-                colors(i, 2) = 1;
-        }
+        if (parse_args(argc, argv, simulation_scene, num_particles, experiment_id)) return 1;
 
 	// Initialize setup
-        setup(num_particles, SIMULATION_SCENE, LOWER_BOUND, UPPER_BOUND, fluid_state, V_box, E_box, SIMULATION_MODE[SIMULATION_SCENE]);
+        setup(num_particles, simulation_scene, lower_bound, upper_bound, fluid_state, V_box, E_box, colors, simulation_modes[simulation_scene]);
 	fluid.init_state(fluid_state); 
         
         // Launch new thread for simulation
@@ -238,30 +192,28 @@ int main(int argc, char **argv) {
         Visualize::viewer().callback_mouse_down = &mouse_down;
         Visualize::viewer().callback_mouse_up = &mouse_up;
 
-        // Density Chart
-        Visualize::viewer_menu().callback_draw_custom_window = [&]()
-        {
-        // Define next window position + size
-        ImGui::SetNextWindowPos(ImVec2(180.f * Visualize::viewer_menu().menu_scaling(), 0), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(100, 10), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Density Plot", nullptr, ImGuiWindowFlags_NoSavedSettings);
+        /* 
+        Density Chart
+        Reference: https://github.com/dilevin/CSC417-a3-finite-elements-3d
+        */ 
+        Visualize::viewer_menu().callback_draw_custom_window = [&](){
+                // Define next window position + size
+                ImGui::SetNextWindowPos(ImVec2(180.f * Visualize::viewer_menu().menu_scaling(), 0), ImGuiCond_FirstUseEver);
+                ImGui::SetNextWindowSize(ImVec2(100, 10), ImGuiCond_FirstUseEver);
+                ImGui::Begin("Density Plot", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
-        ImVec2 min = ImGui::GetWindowContentRegionMin();
-        ImVec2 max = ImGui::GetWindowContentRegionMax();
-        max.x = ( max.x - min.x ) / 2;
-        max.y -= min.y + ImGui::GetTextLineHeightWithSpacing() * 3;
+                ImVec2 min = ImGui::GetWindowContentRegionMin();
+                ImVec2 max = ImGui::GetWindowContentRegionMax();
+                max.x = ( max.x - min.x ) / 2;
+                max.y -= min.y + ImGui::GetTextLineHeightWithSpacing() * 3;
 
-        Visualize::plot_density("Average Density", 1, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_PlotLines));
-        Visualize::plot_density("Max Density", 2, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_HeaderActive));
+                Visualize::plot_density("Average Density", 1, ImVec2(0,0.1), ImVec2(0,2 * rho), ImGui::GetColorU32(ImGuiCol_PlotLines));
+                Visualize::plot_density("Max Density", 2, ImVec2(0,0.1), ImVec2(0,2 * rho), ImGui::GetColorU32(ImGuiCol_HeaderActive));
 
-        ImGui::End();
+                ImGui::End();
         };
-
-   
 
         Visualize::viewer().launch_init(true,false,"Position Based Fluids",0,0);
         Visualize::viewer().launch_rendering(true);
-
-
 }
 
