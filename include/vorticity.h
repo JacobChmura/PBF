@@ -11,4 +11,6 @@ Input:
 Output:
 	modifies the velocity of each particle in the fluid by adding forces due to vorticity.
 */
-void apply_vorticity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours, Eigen::MatrixXd &v, Eigen::MatrixXd omega, Eigen::MatrixXd eta, Eigen::MatrixXd N, Eigen::MatrixXd vorticity_f, double vorticity_epsilon, double kernel_h, double dt);
+void apply_vorticity(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours, 
+				Eigen::MatrixXd &v, Eigen::MatrixXd omega, Eigen::MatrixXd eta, Eigen::MatrixXd N, 
+				Eigen::MatrixXd vorticity_f, double vorticity_epsilon, double kernel_h, double dt);

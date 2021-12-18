@@ -20,6 +20,7 @@ void SpatialHashGrid::insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_stat
 
                 // this key does not exist yet, create an empty set at that location
                 if (this->cells.find(hashed_coord) == this->cells.end()) this->cells[hashed_coord] = std::set<int>(); 
+                
                 // Add the particle global index
                 this->cells[hashed_coord].insert(i);
         }
@@ -49,6 +50,7 @@ void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_
                 for (int dx = -1; dx <= 1; dx ++){
                         for (int dy = -1; dy <= 1; dy++){
                                 for (int dz = -1; dz <= 1; dz ++){
+
                                         // Construct cell coordinate of the current neighbourhood 
                                         neighbourhood_coord << dx, dy, dz;
                                         neighbourhood_coord += cell_coord;
@@ -59,16 +61,13 @@ void SpatialHashGrid::findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_
 
                                                 // Add each one (including yourself) as a neighbour
                                                 for (auto particle_idx: cells[hashed_coord]){
-                                                        if (! std::count(neighbours[i].begin(), neighbours[i].end(), particle_idx)) neighbours[i].push_back(particle_idx);
-                                                        
+                                                        if (! std::count(neighbours[i].begin(), neighbours[i].end(), particle_idx)) neighbours[i].push_back(particle_idx);                                                       
                                                 }
                                         }
                                 }
                         } 
                 }
         }
-
-
 }
 
 Eigen::Vector3d SpatialHashGrid::WorldToCell(Eigen::Vector3d world_coord){

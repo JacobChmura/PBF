@@ -10,9 +10,7 @@
 #include <imgui/imgui_internal.h>
 
 #include <deque>
-
 #include <Eigen/Dense>
-
 
 namespace Visualize {
 
@@ -26,8 +24,8 @@ namespace Visualize {
 
     void get_mouse_down_pos(igl::opengl::glfw::Viewer &viewer, Eigen::Vector3d& mouse_pos);
 
-    void add_energy(float t, float average_density, float max_density);
-    bool plot_energy(const char *label, unsigned int type, ImVec2 T_bounds, ImVec2 V_bounds, ImU32 plot_col);
+    void add_density(float t, float average_density, float max_density);
+    bool plot_density(const char *label, unsigned int type, ImVec2 T_bounds, ImVec2 V_bounds, ImU32 plot_col);
 }
 
 

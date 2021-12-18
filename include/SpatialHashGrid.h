@@ -25,23 +25,60 @@ public:
 
 
         /* After each simulation step, we need to update our cell grid. Currently this is done by 
-         * removing all particles from the grid and inserting them again. This should be optimized.
+         * removing all particles from the grid and inserting them again. This could be optimized.
 
         Input: 
-                Particle p: the particle to update.
+                const Eigen::Ref<const Eigen::MatrixXd> &fluid_state: the current system fluid state.
         */
         void update(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 
-        /* Find Neighours for particle p using the predicted position for the jacobi update, 
+        /* Find Neighours for the system using the predicted position for the jacobi update, 
          * and update the p.neighbours set to reflect the (possibly) new neighbours.
         
         Input:
-                Particle p: the particle to find neighbours for.
+                const Eigen::Ref<const Eigen::MatrixXd> &x_new: the current positions of the particles 
+
+        Modifies:
+                std::vector<std::vector<int>> &neighbours: the fluids neighborhood lookup table with the current neighbours
         */  
         void findNeighbours(const Eigen::Ref<const Eigen::MatrixXd> &x_new, std::vector<std::vector<int>> &neighbours);
         
 private:
+        /* 
+        Hash the positional indices in our 3d cell grid to a key in our hash map.
+        Right now, our keys are just the tuple of positional indices (guarenteed no collision on hash)
+
+        Input:
+                Eigen::Vector3d cell_coord the positional indices in our 3d cell grid.
+
+        Output:
+                std::tuple<int, int, int> hash: contains key into our cell hash map by
+                                                simply converting the input to a tuple. 
+        */
+        std::tuple<int, int, int> hash(Eigen::Vector3d cell_coord);
+
+        /* Insert the fluid state into the grid. Requires finding the cell that it is contained in, 
+         * then adding the particle global index into this hash.
+
+        Input: 
+                const Eigen::Ref<const Eigen::MatrixXd> &fluid_state: the current system fluid state.
+        */
+        void insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
+
         
+        /*
+        Convert world-space coordinates into a cell index in the x, y, z axis.
+
+        Input:
+                Eigen::Vector3d world_coord: the 3d position in world space.
+
+        Output:
+                Eigen::Vector3d the positional indices in our 3d cell grid.
+        */ 
+        Eigen::Vector3d WorldToCell(Eigen::Vector3d world_coord);
+
+private:
+
         // Grid Dimensionality and Size Properties
         Eigen::Vector3d lower_bound, upper_bound;
         double cell_size; 
@@ -54,37 +91,6 @@ private:
         */
         std::map<std::tuple<int, int, int>, std::set<int>> cells;
 
-        /*
-        Convert world-space coordinates into a cell index in the x, y, z axis.
-
-        Input:
-                Eigen::Vector3d world_coord: the 3d position in world space.
-
-        Output:
-                Eigen::Vector3d the positional indices in our 3d cell grid.
-        */ 
-        Eigen::Vector3d WorldToCell(Eigen::Vector3d world_coord);
-
-        /* 
-        Hash the positional indices in our 3d cell grid to a key in our hash map.
-        Right now, our keys are just the tuple of positional indices.
-
-        Input:
-                Eigen::Vector3d cell_coord the positional indices in our 3d cell grid.
-
-        Output:
-                std::tuple<int, int, int> hash: contains key into our cell hash map by
-                                                simply converting the input to a tuple. 
-        */
-        std::tuple<int, int, int> hash(Eigen::Vector3d cell_coord);
-
-        /* Insert the particle p into the grid. Requires finding the cell that it is contained in, 
-         * then adding the particle global index into this hash.
-
-        Input: 
-                Particle p: the particle to insert.
-        */
-        void insert(const Eigen::Ref<const Eigen::MatrixXd> &fluid_state);
 };
 
 #endif

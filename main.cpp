@@ -25,7 +25,7 @@ vorticity_epsilon = 0.0001
 // Particle Parameters
 double PARTICLE_MASS = 1.0;
 double RHO = 20000.0;
-int num_particles = 5000;
+int num_particles = 200;
 
 // External Force Parameters
 double GRAVITY_F = 9.8;
@@ -93,7 +93,7 @@ void simulate(){
         int flag;
 	while(simulating){
 		fluid.step(fluid_state, colors, mouse_pos, add_user_force, use_viscocity, use_vorticity);
-                Visualize::add_energy(fluid.t, fluid.avg_density, fluid.max_density);
+                Visualize::add_density(fluid.t, fluid.avg_density, fluid.max_density);
                 capture_frame = true;               
         }    
 }
@@ -251,8 +251,8 @@ int main(int argc, char **argv) {
         max.x = ( max.x - min.x ) / 2;
         max.y -= min.y + ImGui::GetTextLineHeightWithSpacing() * 3;
 
-        Visualize::plot_energy("Average Density", 1, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_PlotLines));
-        Visualize::plot_energy("Max Density", 2, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_HeaderActive));
+        Visualize::plot_density("Average Density", 1, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_PlotLines));
+        Visualize::plot_density("Max Density", 2, ImVec2(0,0.1), ImVec2(0,2 * RHO), ImGui::GetColorU32(ImGuiCol_HeaderActive));
 
         ImGui::End();
         };
