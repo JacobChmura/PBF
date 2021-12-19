@@ -101,7 +101,7 @@ which will launch a fluid with 2000 particles in the Dam Fall scene.
 The supported argument list is:
 
 ```bash
-./Position-Based-Fluids \<Simulation Scene\> \<Number of Particles\> \<Experiment Name\>
+./Position-Based-Fluids <Simulation Scene> <Number of Particles> <Experiment Name>
 ```
 
 The `Simulation Scene` is an integer between 0 and 4 inclusive. This determines the initial state of the fluid. Each scene can be pictured below
@@ -130,6 +130,32 @@ For example, to run a *Double Dam Fall* with 10,000 particles issue:
 
 
 ## Program Interaction
+
+Whent the program is launched, you will see this on the command line:
+
+![](results/interaction.png)
+
+
+<kbd>Spacebar</kbd> will pause and continue the current simulation
+<kbd>0</kbd> will restart a *Dam Fall*
+<kbd>1</kbd> will restart a *Dam Break*
+<kbd>2</kbd> will restart a *Double Dam Fall*
+<kbd>3</kbd> will restart a *Double Dam Break*
+<kbd>4</kbd> will restart a *Resting Fluid*
+
+<kbd>f</kbd> will enable or disable *user force mode*. When this is enabled, holding the mouse at a location will create an external force on the fluid in the direction of your mouse. This can be used to create interactive wave like simulations.
+<kbd>v</kbd> will enable or disable *vorticity confinement*. By default it is enabled.
+<kbd>x</kbd> will enable or disable *XSPH viscocity*. By default it is enabled.
+
+**Note that if you want to change the number of particles in your fluid you need to relaunch the program**
+
+
+
+
+
+
+
+
 
 ## Saving an Interaction
 
