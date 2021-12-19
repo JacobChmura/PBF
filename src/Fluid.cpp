@@ -165,11 +165,11 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
 		// ----------- Collision Detection ---------
                 for(int p_i = 0; p_i < num_particles; p_i++){
                         for(int axis = 0; axis < 3; axis++){
-                                if (x_new.row(p_i)[axis] < lower_bound){ 
+                                if (x_new.row(p_i)[axis] <= lower_bound){ 
                                         x_new.row(p_i)[axis] = lower_bound;
                                         if (v(p_i, axis) < 0) v(p_i, axis) *= -3;
                                 }
-                                if (x_new.row(p_i)[axis] > upper_bound){ 
+                                if (x_new.row(p_i)[axis] >= upper_bound){ 
                                         x_new.row(p_i)[axis] = upper_bound;
                                         if (v(p_i, axis) > 0) v(p_i, axis) *= -3;
                                 }
@@ -217,7 +217,7 @@ void Fluid::step(Eigen::MatrixXd &fluid_state, Eigen::MatrixXd &colors, Eigen::V
                 << " ms]\n----------------------------------------\n";
 
 
-        // // Debugging using colors for now.
+        // Track Neighbours
         // colors.row(0) << 1, 0, 0; // track particle 0 in red
         // for (int i = 1; i < num_particles; i++){
         //         colors.row(i) << 0, 0, 1; 

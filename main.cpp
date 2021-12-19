@@ -11,17 +11,6 @@
 
 #define CAPTURE 0 // if you want to save frames
 
-/* 2000 Particles good params
-RHO = 100000
-num_particles = 2000
-jacobi_iteraions = 4
-cfm_epsilon = 60
-tensile_k = 0.1
-tensile_delta_1 = 0.2*kernel
-tensile_n = 4
-viscocicity_c = 0.0001
-vorticity_epsilon = 0.0001
-*/
 
 // ---------------- Constants ----------------
 double dt = 0.0001;
@@ -38,10 +27,9 @@ double upper_bound = 1;
 Eigen::MatrixXd V_box(8,3);
 Eigen::MatrixXi E_box(12,2);
 
-// ---------------- Configurable -------------
-int num_particles = 200;
-int jacobi_iterations = 3;
-double rho = 20000.0; // rest density
+int num_particles = 2000;
+int jacobi_iterations = 4;
+double rho = 10000.0; // rest density
 double cfm_epsilon = 60.0; // Constraint Force Mixing Relaxation
 
 // Tensile Stability 
