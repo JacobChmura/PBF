@@ -69,7 +69,7 @@ void Visualize::setup(const Eigen::MatrixXd &fluid_state){
 			menu.draw_viewer_menu();
 		};
 
-	g_viewer.core().background_color.setConstant(0.95);
+	g_viewer.core().background_color.setConstant(1.);
 	g_viewer.core().is_animating = true;
 	g_viewer.data().point_size = 3.; // determines visual appeal
 }	

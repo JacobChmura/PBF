@@ -212,8 +212,9 @@ The result will be found at *data/test_force/gifs/test_force.gif*
 * ~~Density plot~~
 * ~~Save frames~~
 * ~~Clean up and Document~~
-* Aesthetics
 * GPU
+* RealTime Rendering
 
 ### References
 
+Position Based Fluids: <https://mmacklin.com/pbf_sig_preprint.pdf>
