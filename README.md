@@ -8,36 +8,39 @@ This is the Final Project CSC417: Physics based animation. This repository conta
 ### Project Layout
 
 The directory and file layout is the following:
-	README.md
-	CMakeLists.txt
-	main.cpp
-	setup.h
-	include/
-		Fluid.h
-		SpatialHashGrid.h
-		kernel.h
-		viscocity.h
-		vorticity.h
-	src/
-		Fluid.cpp
-		SpatialHashGrid.cpp
-		kernel.cpp
-		viscocity.cpp
-		vorticity.cpp
-	shared/
-		include/
-			visualization.h
-		src/
-			visualization.cpp
-	data/
-		Experiment
-			frames/
-				...
-			gif/
-				...
-	results/
-	scripts/
-		create_gif.py
+
+```bash
+├── CMakeLists.txt
+├── data
+│   └── debug
+│       ├── frames
+│       └── gifs
+├── include
+│   ├── Fluid.h
+│   ├── kernel.h
+│   ├── SpatialHashGrid.h
+│   ├── viscocity.h
+│   └── vorticity.h
+├── main.cpp
+├── README.md
+├── results
+├── scripts
+│   └── create_gif.py
+├── setup.h
+├── shared
+│   ├── include
+│   │   └── visualization.h
+│   └── src
+│       └── visualization.cpp
+└── src
+    ├── Fluid.cpp
+    ├── kernel.cpp
+    ├── SpatialHashGrid.cpp
+    ├── viscocity.cpp
+    └── vorticity.cpp
+
+```
+
 
 The `main.cpp` file is the entry point of the program. It contains all the constants for the algorithm, launches a simulation thread, and handles callbacks for interactive simulation.
 
