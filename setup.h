@@ -76,8 +76,8 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
         fluid_state = Eigen::MatrixXd::Random(num_particles, 3);
         switch(simulation_scene){
                 case 0: { // dam fall
-                        double HI = 0.5;
-                        double LO = -0.5;
+                        double HI = 0.3;
+                        double LO = -0.3;
                         double range = HI - LO;       
                         
                         fluid_state = (fluid_state + Eigen::MatrixXd::Constant(fluid_state.rows(), fluid_state.cols(), 1.))*range/2.;
@@ -92,10 +92,10 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
                         Eigen::MatrixXd block_two = Eigen::MatrixXd::Random(num_particles_block_two, fluid_state.cols()); 
 
-                        double HI_block_one = 0.2;
-                        double HI_block_two = 0.75;
-                        double LO_block_one = -0.75;
-                        double LO_block_two = -0.2;
+                        double HI_block_one = 0.3;
+                        double HI_block_two = 0.3;
+                        double LO_block_one = -0.3;
+                        double LO_block_two = -0.3;
                         double range_block_one = HI_block_one - LO_block_one;       
                         double range_block_two = HI_block_one - LO_block_one;       
 
@@ -104,23 +104,27 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), 1.))*range_block_two/2.;
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), LO_block_two));
 
+                        // translate
+                        block_one.block(0, 0, block_one.rows(), 1) = block_one.block(0, 0, block_one.rows(), 1) - Eigen::MatrixXd::Constant(block_one.rows(), 1, 0.35);
+                        block_two.block(0, 0, block_two.rows(), 1) = block_two.block(0, 0, block_two.rows(), 1) + Eigen::MatrixXd::Constant(block_two.rows(), 1, 0.35);
+
                         fluid_state.block(0, 0, block_one.rows(), block_one.cols()) = block_one;
                         fluid_state.block(num_particles_block_one, 0, block_two.rows(), block_two.cols()) = block_two;
                         break;
                 }
                 case 2: {// dam break
 
-                        int num_particles_block_one = int(num_particles / 4);
+                        int num_particles_block_one = int(num_particles / 2);
                         int num_particles_floor = fluid_state.rows() - num_particles_block_one;
                        
-                        double HI_block_one = 0.5;
-                        double LO_block_one = -0.5;
-                        double HI_surface_x = 1;
+                        double HI_block_one = 0.3;
+                        double LO_block_one = -0.3;
+                        double HI_surface_x = 0.5;
                         double HI_surface_y = -0.95;
-                        double HI_surface_z = 1;
-                        double LO_surface_x = -1;
+                        double HI_surface_z = 0.5;
+                        double LO_surface_x = -0.5;
                         double LO_surface_y = -1;
-                        double LO_surface_z = -1;
+                        double LO_surface_z = -0.5;
                         double range_block_one = HI_block_one - LO_block_one;       
                         double range_surface_x = HI_surface_x - LO_surface_x;
                         double range_surface_y = HI_surface_y - LO_surface_y;
@@ -147,17 +151,17 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         break;
                 }
                 case 3: {// double dam break
-                        int num_particles_block_one = int(num_particles / 8);
-                        int num_particles_block_two = int(num_particles / 8);
+                        int num_particles_block_one = int(num_particles / 4);
+                        int num_particles_block_two = int(num_particles / 4);
                         int num_particles_floor = fluid_state.rows() - num_particles_block_one - num_particles_block_two;
 
                         Eigen::MatrixXd block_one = Eigen::MatrixXd::Random(num_particles_block_one, fluid_state.cols()); 
                         Eigen::MatrixXd block_two = Eigen::MatrixXd::Random(num_particles_block_two, fluid_state.cols()); 
 
-                        double HI_block_one = 0.2;
-                        double HI_block_two = 0.75;
-                        double LO_block_one = -0.75;
-                        double LO_block_two = -0.2;
+                        double HI_block_one = 0.3;
+                        double HI_block_two = 0.3;
+                        double LO_block_one = -0.3;
+                        double LO_block_two = -0.3;
                         double range_block_one = HI_block_one - LO_block_one;       
                         double range_block_two = HI_block_one - LO_block_one;       
 
@@ -166,12 +170,16 @@ void setup(int num_particles, int simulation_scene, double lower_bound, double u
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), 1.))*range_block_two/2.;
                         block_two = (block_two + Eigen::MatrixXd::Constant(block_two.rows(), block_two.cols(), LO_block_two));
 
-                        double HI_surface_x = 1;
+                        // translate
+                        block_one.block(0, 0, block_one.rows(), 1) = block_one.block(0, 0, block_one.rows(), 1) - Eigen::MatrixXd::Constant(block_one.rows(), 1, 0.35);
+                        block_two.block(0, 0, block_two.rows(), 1) = block_two.block(0, 0, block_two.rows(), 1) + Eigen::MatrixXd::Constant(block_two.rows(), 1, 0.35);
+
+                        double HI_surface_x = 0.5;
                         double HI_surface_y = -0.95;
-                        double HI_surface_z = 1;
-                        double LO_surface_x = -1;
+                        double HI_surface_z = 0.5;
+                        double LO_surface_x = -0.5;
                         double LO_surface_y = -1;
-                        double LO_surface_z = -1;
+                        double LO_surface_z = -0.5;
                         double range_surface_x = HI_surface_x - LO_surface_x;
                         double range_surface_y = HI_surface_y - LO_surface_y;
                         double range_surface_z = HI_surface_z - LO_surface_y;

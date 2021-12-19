@@ -1,5 +1,5 @@
 # CSC417 Final Project: Position Based Fluids
-![](results/2k_waves.gif)
+![](results/GIFS/2k_waves.gif)
 
 ## Introduction
 
@@ -108,11 +108,11 @@ The `Simulation Scene` is an integer between 0 and 4 inclusive. This determines 
 
 0: *Dam Fall*            |  1: *Dam Break*            
 :-------------------------:|:-------------------------:
-![](results/2k_waves.gif)  |  ![](results/2k_waves.gif)
+![](results/GIFS/2k_dam_fall.gif)  |  ![](results/GIFS/4k_dam_break.gif)
 
 2: *Double Dam Fall*            |  3: *Double Dam Break*            
 :-------------------------:|:-------------------------:
-![](results/2k_waves.gif)  |  ![](results/2k_waves.gif)
+![](results//GIFS/4k_double_dam_fall.gif)  |  ![](results/GIFS/6k_double_dam_break.gif)
 
 
 The simulation scene 4 simply involves a stationary fluid as a floor.
