@@ -87,6 +87,47 @@ make
 
 The compilation should create an object file *Position-Based-Fluids*.
 
+To run the program with the default arguments simply issue:
+
+```bash
+./Position-Based-Fluids
+```
+
+which will launch a fluid with 2000 particles in the Dam Fall scene.
+
+
+
+
+The supported argument list is:
+
+```bash
+./Position-Based-Fluids \<Simulation Scene\> \<Number of Particles\> \<Experiment Name\>
+```
+
+The `Simulation Scene` is an integer between 0 and 4 inclusive. This determines the initial state of the fluid. Each scene can be pictured below
+
+0: *Dam Fall*            |  1: *Dam Break*            
+:-------------------------:|:-------------------------:
+![](results/2k_waves.gif)  |  ![](results/2k_waves.gif)
+
+2: *Double Dam Fall*            |  3: *Double Dam Break*            
+:-------------------------:|:-------------------------:
+![](results/2k_waves.gif)  |  ![](results/2k_waves.gif)
+
+
+The simulation scene 4 simply involves a stationary fluid as a floor.
+
+The `Number of Particles` is an integer between 10 and 20,000 inclusive. It specifies the number of particles the fluid will have.
+
+The `Experiment id` is a string to name the experiment with. This determines where the frames are exported to if writing frames is enabled (explained below).
+
+
+For example, to run a *Double Dam Fall* with 10,000 particles issue:
+
+```bash
+./Position-Based-Fluids 2 10000
+```
+
 
 ## Program Interaction
 
