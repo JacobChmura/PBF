@@ -131,20 +131,27 @@ For example, to run a *Double Dam Fall* with 10,000 particles issue:
 
 ## Program Interaction
 
-Whent the program is launched, you will see this on the command line:
+When the program is launched, you will see this on the command line:
 
 ![](results/interaction.png)
 
 
 <kbd>Spacebar</kbd> will pause and continue the current simulation
+
 <kbd>0</kbd> will restart a *Dam Fall*
+
 <kbd>1</kbd> will restart a *Dam Break*
+
 <kbd>2</kbd> will restart a *Double Dam Fall*
+
 <kbd>3</kbd> will restart a *Double Dam Break*
+
 <kbd>4</kbd> will restart a *Resting Fluid*
 
 <kbd>f</kbd> will enable or disable *user force mode*. When this is enabled, holding the mouse at a location will create an external force on the fluid in the direction of your mouse. This can be used to create interactive wave like simulations.
+
 <kbd>v</kbd> will enable or disable *vorticity confinement*. By default it is enabled.
+
 <kbd>x</kbd> will enable or disable *XSPH viscocity*. By default it is enabled.
 
 **Note that if you want to change the number of particles in your fluid you need to relaunch the program**
@@ -158,6 +165,36 @@ Whent the program is launched, you will see this on the command line:
 
 
 ## Saving an Interaction
+
+If you want to record an interaction, perform the following steps. In this example I will simulate a *Resting Fluid* with 10,000 particles, apply my own forces with the mouse, and save the experiment under the name *test_force*
+
+From the same directory as the exuctable, issue the following:
+
+```bash
+mkdir ../data/test_force
+mkdir ../data/test_force/frames
+mkdir ../data/test_froce/gifs
+```
+
+
+Then launch program:
+
+```bash
+./Position-Based-Fluids 4 10000 test_force
+```
+
+Click on the Window that has launched and press <kbd>f</kbd>. Then apply forces as you wish. When you are done you can simply force shutdown the program from the terminal.
+
+
+Then, run the pythn script to create a gif from the frames:
+
+```bash
+python ../scripts/create_gif.py test_force
+```
+
+The result will be found at *data/test_force/gifs/test_force.gif*
+
+
 
 
 ### TODO
